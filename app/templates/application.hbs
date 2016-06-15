@@ -1,0 +1,29 @@
+ <div class="site-wrapper">
+  <div class="site-wrapper-inner">
+    <div class="cover-container">
+      <div class="masthead clearfix">
+
+        <div class="inner">
+          <h3 class="masthead-brand">Potato {{isIndex}}</h3>
+          <nav>
+            <ul class="nav masthead-nav">
+              <li {{bind-attr class="isIndex:active"}}>
+                {{#link-to "index"}}Home{{/link-to}}
+              </li>
+              <li {{bind-attr class="isInstructions:active"}}>
+                {{#link-to "instructions"}}Instructions{{/link-to}}
+              </li>
+              <li {{bind-attr class="isScores:active"}}>
+                {{#link-to "scores"}}High Scores{{/link-to}}
+              </li>
+              <li {{bind-attr class="isContact:active"}}>
+                {{#link-to "contact"}}Contact{{/link-to}}
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+      {{outlet}}
+    </div>
+  </div>
+</div>
