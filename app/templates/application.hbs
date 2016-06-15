@@ -7,18 +7,10 @@
           <h3 class="masthead-brand">Potato {{isIndex}}</h3>
           <nav>
             <ul class="nav masthead-nav">
-              <li {{bind-attr class="isIndex:active"}}>
-                {{#link-to "index"}}Home{{/link-to}}
-              </li>
-              <li {{bind-attr class="isInstructions:active"}}>
-                {{#link-to "instructions"}}Instructions{{/link-to}}
-              </li>
-              <li {{bind-attr class="isScores:active"}}>
-                {{#link-to "scores"}}High Scores{{/link-to}}
-              </li>
-              <li {{bind-attr class="isContact:active"}}>
-                {{#link-to "contact"}}Contact{{/link-to}}
-              </li>
+              {{#link-to "index" tagName="li" class="headlink"}}Home{{/link-to}}
+              {{#link-to "instructions" tagName="li" class="headlink"}}Instructions{{/link-to}}
+              {{#link-to "scores" tagName="li" class="headlink"}}High Scores{{/link-to}}
+              {{#link-to "contact" tagName="li" class="headlink"}}Contact{{/link-to}}
             </ul>
           </nav>
         </div>
