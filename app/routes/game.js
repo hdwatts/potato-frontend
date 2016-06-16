@@ -28,11 +28,12 @@ export default Ember.Route.extend({
     var enemy;
     var ship;
     var result = 'Move with the arrow keys';
+    var round;
 
     // Instantiating gameworld, applying physics, animations
     // and sprites to map
     function create(){
-
+      round = 1;
       // P2 physics engine
       game.physics.startSystem(Phaser.Physics.P2JS);
 
@@ -86,6 +87,9 @@ export default Ember.Route.extend({
 
       // Check for player sprite hitting an enemy
       ship.body.onBeginContact.add(enemyHit, this);
+
+      //add timer for 60 seconds, calling gameOver() when finished
+      game.time.events.add(Phaser.Timer.SECOND * 15, nextRound, this);
     }
 
     function enemyHit(body, bodyB, shapeA, shapeB, equation) {
@@ -119,7 +123,11 @@ export default Ember.Route.extend({
       {
         result = 'Move with the arrow keys';
       }
+    }
 
+    function nextRound() {
+      round++;
+      game.time.events.add(Phaser.Timer.SECOND * 15, nextRound, this);
     }
 
     function update() {
@@ -154,6 +162,7 @@ export default Ember.Route.extend({
 
     function render() {
       game.debug.text(result, 50, 50);
+      game.debug.text("Round " + round + " time: " + parseInt((game.time.events.duration / 1000) + 1), 32, 20);
     }
   }
 });

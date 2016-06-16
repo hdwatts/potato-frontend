@@ -4,20 +4,30 @@
 
 #phaser {
   display: flex;
-  
+
 }
 
 #phaser {
   margin: auto;
 }
 
+.list-group{
+  color: #000;
+}
+
+td {
+  border: 1px solid white;
+}
+
+.headlink{
+  cursor: pointer;
+}
 
 /* Links */
 li.headlink,
 li.headlink:focus,
 li.headlink:hover {
   color: #fff;
-  cursor: pointer;
 }
 
 .ember-view {
