@@ -27,7 +27,8 @@ export default Ember.Route.extend({
     var map;
     var layer;
     var cursors;
-    var enemy;
+    var enemies = [];
+    var enemyCount = 3;
     var ship;
     var result = 'Move with the arrow keys';
     var round;
@@ -59,28 +60,33 @@ export default Ember.Route.extend({
       game.physics.p2.setImpactEvents(true);
       game.physics.p2.restitution = 0.25;
 
-      // Add enemy sprites to gameworld
-      enemy = game.add.sprite(175, 300, 'wizball');
-
       // Add player sprite to gameworld
       ship = game.add.sprite(200, 200, 'ship');
       ship.smoothed = false;
+      ship.scale.set(0.5);
 
       // Add idle animations to the player sprite
-      ship.animations.add('fly', [0,1,2,3,4,5], 10, true);
-      ship.scale.set(0.5);
-      ship.play('fly');
+      //ship.animations.add('fly', [0,1,2,3,4,5], 10, true);
+      //ship.play('fly');
+      // Add enemy sprites to gameworld
+      for(var x = 0; x < enemyCount; x++ ) {
+        enemies.push(game.add.sprite(200 + (x * 128), 200, 'ship'));
+      }
 
       // Apply physics and camera, second argument is debug mode
-      game.physics.p2.enable([ship, enemy], false);
+      game.physics.p2.enable(ship, false);
       game.camera.follow(ship);
 
       // Set bounding boxes of enemies and player
-      enemy.body.setCircle(45);
-
       // Arguments are (width, height, offsetX, offsetY, and rotation)
       ship.body.setRectangle(32, 64);
-      
+      enemies.forEach(function(enemy){
+        //apply physics to enemy
+        game.physics.p2.enable(enemy, false);
+        enemy.scale.set(0.5);
+        enemy.body.setRectangle(32, 64);
+      });
+
       // The first 4 parameters control if you need a boundary
       // on the left, right, top and bottom of your world.
       // The final parameter (false) controls if the boundary 
@@ -135,8 +141,24 @@ export default Ember.Route.extend({
       game.time.events.add(Phaser.Timer.SECOND * 15, nextRound, this);
     }
 
-    function update() {
+    function moveTowardsPoint(enemy, x, y){
+        var speed = 60;
+        var angle = Math.atan2(y - enemy.y, x - enemy.x);
+        enemy.body.rotation = angle + game.math.degToRad(90);  // correct angle of angry bullets (depends on the sprite used)
+        enemy.body.force.x = Math.cos(angle) * speed;    // accelerateToObject 
+        enemy.body.force.y = Math.sin(angle) * speed;
+    }
 
+    function updateAi(enemy){
+      if(ship){
+        moveTowardsPoint(enemy, ship.x, ship.y);
+      }//console.log(ship.position.x + ", " + ship.position.y)
+    }
+
+    function update() {
+      enemies.forEach(function(enemy){
+        updateAi(enemy);
+      });
       // Set rotation to left and right arrow keys
       // Higher values relate to faster rotation
       if (cursors.left.isDown)
