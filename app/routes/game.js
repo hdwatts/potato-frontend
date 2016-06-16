@@ -22,11 +22,12 @@ export default Ember.Route.extend({
     var layer;
     var cursors;
     var ship;
+    var round;
 
     // Instantiating gameworld, applying physics, animations
     // and sprites to map
     function create(){
-
+      round = 1;
       // P2 physics engine
       game.physics.startSystem(Phaser.Physics.P2JS);
 
@@ -73,6 +74,14 @@ export default Ember.Route.extend({
 
       // Set game input to arrow keys
       cursors = game.input.keyboard.createCursorKeys();
+
+      //add timer for 60 seconds, calling gameOver() when finished
+      game.time.events.add(Phaser.Timer.SECOND * 15, nextRound, this);
+    }
+
+    function nextRound() {
+      round++;
+      game.time.events.add(Phaser.Timer.SECOND * 15, nextRound, this);
     }
 
     function update() {
@@ -106,6 +115,7 @@ export default Ember.Route.extend({
     }
 
     function render() {
+      game.debug.text("Round " + round + " time: " + parseInt((game.time.events.duration / 1000) + 1), 32, 20);
     }
   }
 });
