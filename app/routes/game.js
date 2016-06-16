@@ -2,26 +2,32 @@ import Ember from 'ember';
 
 export default Ember.Route.extend({
   activate: function(){
-    var game = new Phaser.Game(800, 600, Phaser.AUTO, 'phaser', 
+    var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'phaser', 
       { preload: preload,
         create: create,
         update: update,
         render: render
       });
     
-    // Asset loading, including sprites and tilemap
     function preload(){
+      // Tilemap
       game.load.tilemap(    'map',        '/assets/images/tilemaps/collision_tilemap.json', null, Phaser.Tilemap.TILED_JSON);
+      // Tiles
       game.load.image(      'ground_1x1', '/assets/images/tiles/ground_1x1.png');
       game.load.image(      'walls_1x2',  '/assets/images/tiles/walls_1x2.png');
       game.load.image(      'tiles2',     '/assets/images/tiles/tiles2.png');
+      // Enemies
+      game.load.image(      'wizball',    '/assets/images/sprites/wizball.png');
+      // Player sprite
       game.load.spritesheet('ship',       '/assets/images/sprites/humstar.png', 32, 32);
     }
 
     var map;
     var layer;
     var cursors;
+    var enemy;
     var ship;
+    var result = 'Move with the arrow keys';
     var round;
 
     // Instantiating gameworld, applying physics, animations
@@ -32,7 +38,6 @@ export default Ember.Route.extend({
       game.physics.startSystem(Phaser.Physics.P2JS);
 
       map = game.add.tilemap('map');
-
       map.addTilesetImage('ground_1x1');
       map.addTilesetImage('walls_1x2');
       map.addTilesetImage('tiles2');
@@ -49,7 +54,11 @@ export default Ember.Route.extend({
 
       // Sets bounciness of game physics
       // Lower values are less bouncy
+      game.physics.p2.setImpactEvents(true);
       game.physics.p2.restitution = 0.25;
+
+      // Add enemy sprites to gameworld
+      enemy = game.add.sprite(175, 300, 'wizball');
 
       // Add player sprite to gameworld
       ship = game.add.sprite(200, 200, 'ship');
@@ -60,10 +69,11 @@ export default Ember.Route.extend({
       ship.animations.add('fly', [0,1,2,3,4,5], 10, true);
       ship.play('fly');
 
-      // Apply physics and camera to the ship
-      game.physics.p2.enable(ship);
+      // Apply physics and camera, second argument is debug mode
+      game.physics.p2.enable([ship, enemy], false);
       game.camera.follow(ship);
 
+      enemy.body.setCircle(45);
       ship.body.setCircle(28);
       
       // The first 4 parameters control if you need a boundary
@@ -75,8 +85,44 @@ export default Ember.Route.extend({
       // Set game input to arrow keys
       cursors = game.input.keyboard.createCursorKeys();
 
+      // Check for player sprite hitting an enemy
+      ship.body.onBeginContact.add(enemyHit, this);
+
       //add timer for 60 seconds, calling gameOver() when finished
       game.time.events.add(Phaser.Timer.SECOND * 15, nextRound, this);
+    }
+
+    function enemyHit(body, bodyB, shapeA, shapeB, equation) {
+      //  The block hit something.
+      //  
+      //  This callback is sent 5 arguments:
+      //  
+      //  The Phaser.Physics.P2.Body it is in contact with. 
+      //  *This might be null* if the Body was created directly 
+      //  in the p2 world.
+      //  The p2.Body this Body is in contact with.
+      //  The Shape from this body that caused the contact.
+      //  The Shape from the contact body.
+      //  The Contact Equation data array.
+      //  
+      //  The first argument may be null or not have a sprite 
+      //  property, such as when you hit the world bounds.
+
+      if (body)
+      {
+        if (body.sprite) 
+        {
+          result = 'You last hit: ' + body.sprite.key;
+        }
+        else 
+        {
+          result = 'You last hit: the wall'
+        }
+      }
+      else
+      {
+        result = 'Move with the arrow keys';
+      }
     }
 
     function nextRound() {
@@ -115,6 +161,7 @@ export default Ember.Route.extend({
     }
 
     function render() {
+      game.debug.text(result, 50, 50);
       game.debug.text("Round " + round + " time: " + parseInt((game.time.events.duration / 1000) + 1), 32, 20);
     }
   }
