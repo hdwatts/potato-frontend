@@ -2,6 +2,16 @@
  * Globals
  */
 
+#phaser {
+  display: flex;
+  
+}
+
+#phaser {
+  margin: auto;
+}
+
+
 /* Links */
 li.headlink,
 li.headlink:focus,
@@ -58,8 +68,7 @@ body {
  * Header
  */
 .masthead-brand {
-  margin-top: 10px;
-  margin-bottom: 10px;
+  margin-top: -2px;
 }
 
 .masthead-nav > li {
@@ -112,15 +121,6 @@ body {
   font-weight: bold;
 }
 
-
-/*
- * Footer
- */
-
-.mastfoot {
-  color: #999; /* IE8 proofing */
-  color: rgba(255,255,255,.5);
-}
 
 
 /*
