@@ -19,7 +19,9 @@ export default Ember.Route.extend({
       // Enemies
       game.load.image(      'wizball',    '/assets/images/sprites/wizball.png');
       // Player sprite
-      game.load.spritesheet('ship',       '/assets/images/sprites/humstar.png', 32, 32);
+      // game.load.spritesheet('ship',    '/assets/images/sprites/humstar.png', 32, 32);
+      game.load.image(      'ship',       '/assets/images/sprites/pirate_ship.png');
+
     }
 
     var map;
@@ -62,19 +64,22 @@ export default Ember.Route.extend({
 
       // Add player sprite to gameworld
       ship = game.add.sprite(200, 200, 'ship');
-      ship.scale.set(2);
       ship.smoothed = false;
 
       // Add idle animations to the player sprite
       ship.animations.add('fly', [0,1,2,3,4,5], 10, true);
+      ship.scale.set(0.5);
       ship.play('fly');
 
       // Apply physics and camera, second argument is debug mode
       game.physics.p2.enable([ship, enemy], false);
       game.camera.follow(ship);
 
+      // Set bounding boxes of enemies and player
       enemy.body.setCircle(45);
-      ship.body.setCircle(28);
+
+      // Arguments are (width, height, offsetX, offsetY, and rotation)
+      ship.body.setRectangle(32, 64);
       
       // The first 4 parameters control if you need a boundary
       // on the left, right, top and bottom of your world.
@@ -136,11 +141,11 @@ export default Ember.Route.extend({
       // Higher values relate to faster rotation
       if (cursors.left.isDown)
       {
-        ship.body.rotateLeft(100);
+        ship.body.rotateLeft(75);
       }
       else if (cursors.right.isDown)
       {
-        ship.body.rotateRight(100);
+        ship.body.rotateRight(75);
       }
       else
       {
@@ -151,11 +156,11 @@ export default Ember.Route.extend({
       // Higher values relate to faster acceleration
       if (cursors.up.isDown)
       {
-        ship.body.thrust(275);
+        ship.body.thrust(150);
       }
       else if (cursors.down.isDown)
       {
-        ship.body.reverse(125);
+        ship.body.reverse(100);
       }
 
     }
