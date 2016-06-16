@@ -10,25 +10,32 @@ export default Ember.Route.extend({
       });
     
     function preload(){
+
       // Tilemap
       game.load.tilemap(    'map',        '/assets/images/tilemaps/collision_tilemap.json', null, Phaser.Tilemap.TILED_JSON);
+
       // Tiles
       game.load.image(      'ground_1x1', '/assets/images/tiles/ground_1x1.png');
       game.load.image(      'walls_1x2',  '/assets/images/tiles/walls_1x2.png');
       game.load.image(      'tiles2',     '/assets/images/tiles/tiles2.png');
+
       // Enemies
       game.load.image(      'wizball',    '/assets/images/sprites/wizball.png');
+
       // Player sprite
       // game.load.spritesheet('ship',    '/assets/images/sprites/humstar.png', 32, 32);
       game.load.image(      'ship',       '/assets/images/sprites/pirate_ship.png');
 
+      // Ship wake emitter
+      game.load.image(      'wake',       '/assets/images/sprites/bubble.png');
     }
 
     var map;
     var layer;
+    var layer2;
     var cursors;
     var enemies = [];
-    var enemyCount = 3;
+    var enemyCount = 1;
     var ship;
     var result = 'Move with the arrow keys';
     var round;
@@ -39,6 +46,8 @@ export default Ember.Route.extend({
       round = 1;
       // P2 physics engine
       game.physics.startSystem(Phaser.Physics.P2JS);
+
+      game.stage.backgroundColor = '#0077be';
 
       map = game.add.tilemap('map');
       map.addTilesetImage('ground_1x1');
@@ -54,6 +63,7 @@ export default Ember.Route.extend({
 
       // Convert the tilemap layer into collision bodies
       game.physics.p2.convertTilemap(map, layer);
+      game.physics.p2.convertTilemap(map, layer2);
 
       // Sets bounciness of game physics
       // Lower values are less bouncy
@@ -63,7 +73,19 @@ export default Ember.Route.extend({
       // Add player sprite to gameworld
       ship = game.add.sprite(200, 200, 'ship');
       ship.smoothed = false;
-      ship.scale.set(0.5);
+      ship.scale.set(0.75);
+
+      // Add ship wake via arcade emitter
+      ship.shipWake = game.add.emitter(ship.x, ship.y + 32, 50);
+      ship.shipWake.width = 50;
+      ship.shipWake.makeParticles('wake');
+      ship.shipWake.setXSpeed(50, -50);
+      ship.shipWake.setYSpeed(50, -50);
+      ship.shipWake.setAlpha(1, 0.01, 500);
+      ship.shipWake.setScale(0.05, 0.5, 0.05, 0.5, 5000, Phaser.Easing.Quintic.Out);
+      ship.shipWake.start(false, 1000, 10);
+
+      ship.z = 1000;
 
       // Add idle animations to the player sprite
       //ship.animations.add('fly', [0,1,2,3,4,5], 10, true);
@@ -101,6 +123,8 @@ export default Ember.Route.extend({
 
       //add timer for 60 seconds, calling gameOver() when finished
       game.time.events.add(Phaser.Timer.SECOND * 15, nextRound, this);
+
+      game.world.swap(ship, ship.shipWake);
     }
 
     function enemyHit(body, bodyB, shapeA, shapeB, equation) {
@@ -156,9 +180,16 @@ export default Ember.Route.extend({
     }
 
     function update() {
+
+      // Update wake to follow ship
+      ship.shipWake.x = ship.x;
+      ship.shipWake.y = ship.y;
+
+      // Update target position for each enemy ship
       enemies.forEach(function(enemy){
         updateAi(enemy);
       });
+
       // Set rotation to left and right arrow keys
       // Higher values relate to faster rotation
       if (cursors.left.isDown)
