@@ -2,7 +2,7 @@ import Ember from 'ember';
 
 export default Ember.Route.extend({
   activate: function(){
-    var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'phaser', 
+    var game = new Phaser.Game(800, 608, Phaser.CANVAS, 'phaser', 
       { preload: preload,
         create: create,
         update: update,
@@ -10,27 +10,38 @@ export default Ember.Route.extend({
       });
 
     function generateMap(){
-      return "1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1\n" +
-             "1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,1\n" +
-             "1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1\n" +
-             "1,0,0,1,1,1,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1\n" +
-             "1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,1\n" +
-             "1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,9,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1\n" +
-             "1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,1,0,1,0,0,1\n" +
-             "1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,1,1,1,0,0,1\n" +
-             "1,0,0,0,0,0,0,0,1,11,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,1,1,1,1,0,0,0,0,1,0,0,0,1\n" +
-             "1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,11,11,0,0,0,0,0,0,0,1,0,0,1,0,0,1,1,1,0,0,0,0,0,0,0,0,0,1\n" +
-             "1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,1,0,1,1,0,0,0,11,11,0,0,0,0,1,0,0,1,1,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1\n" +
-             "1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1\n" +
-             "1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1\n" +
-             "1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1\n" +
-             "1,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,1,9,1,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1\n" +
-             "1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1\n" +
-             "1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1\n" +
-             "1,1,1,1,1,9,1,1,1,1,1,9,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1"
+      //generate empty map
+      mapArr = generateEmptyMap();
+
+      //get random prefab objects
+      var numPrefabs = Math.floor(Math.random() * MAX_PREFABS + MIN_PREFABS);
+
+      for(var prefs = 0; prefs < numPrefabs; prefs++){
+        //place prefabs here
+        var prefab_id = Math.floor(Math.random() * 5);
+        switch(prefab_id){
+          case 0:
+            mapArr = place1x1IslandPrefab(mapArr);
+            break;
+          case 1:
+            mapArr = place2x2IslandPrefab(mapArr);
+            break;
+          case 2:
+            mapArr = place3x3IslandPrefab(mapArr);
+            break;
+          case 3:
+            mapArr = place4x4IslandPrefab(mapArr);
+            break;
+          case 4:
+            break;
+        }
+      }
+
+      return mapArrToString(mapArr);
     }
     
     function preload(){
+
       // Tilemap
       game.load.tilemap('map', null, generateMap(), Phaser.Tilemap.CSV);
       //game.load.tilemap(    'map',        '/assets/images/tilemaps/collision_tilemap.json', null, Phaser.Tilemap.TILED_JSON);
@@ -44,16 +55,27 @@ export default Ember.Route.extend({
       // game.load.spritesheet('ship',    '/assets/images/sprites/humstar.png', 32, 32);
       game.load.image(      'ship',       '/assets/images/sprites/pirate_ship.png');
 
+      // Ship wake emitter
+      game.load.image(      'wake',       '/assets/images/sprites/bubble.png');
     }
 
     var map;
+    var mapArr;
     var layer;
+    var layer2;
     var cursors;
     var enemies = [];
-    var enemyCount = 3;
+    var enemyCount = 5;
     var ship;
     var result = 'Move with the arrow keys';
     var round;
+    var animFrame = 0;
+    var WATER_ANIM_SPEED = 200;
+    var GAME_WIDTH = 50;
+    var GAME_HEIGHT = 19;
+    var MIN_PREFABS = 6;
+    var MAX_PREFABS = 12;
+
 
     // Instantiating gameworld, applying physics, animations
     // and sprites to map
@@ -64,6 +86,7 @@ export default Ember.Route.extend({
 
       //load tilemap with 32x32 pixel tiles, add the images and resize the world
       map = game.add.tilemap('map', 32, 32);
+      game.stage.backgroundColor = '#0077be';
       map.addTilesetImage('ground_1x1');
       layer = map.createLayer(0);
       layer.resizeWorld();
@@ -80,16 +103,32 @@ export default Ember.Route.extend({
       game.physics.p2.restitution = 0.25;
 
       // Add player sprite to gameworld
-      ship = game.add.sprite(200, 200, 'ship');
+      var point = getEmptyPoint();
+      console.log("Ship Point: " + point.x + " - " + point.y)
+      ship = game.add.sprite(point.x * 32, point.y * 32, 'ship');
       ship.smoothed = false;
-      ship.scale.set(0.5);
+      ship.scale.set(0.75);
+
+      // Add ship wake via arcade emitter
+      ship.shipWake = game.add.emitter(ship.x, ship.y + 32, 50);
+      ship.shipWake.width = 50;
+      ship.shipWake.makeParticles('wake');
+      ship.shipWake.setXSpeed(50, -50);
+      ship.shipWake.setYSpeed(50, -50);
+      ship.shipWake.setAlpha(1, 0.01, 500);
+      ship.shipWake.setScale(0.05, 0.5, 0.05, 0.5, 5000, Phaser.Easing.Quintic.Out);
+      ship.shipWake.start(false, 1000, 10);
+
+      ship.z = 1000;
 
       // Add idle animations to the player sprite
       //ship.animations.add('fly', [0,1,2,3,4,5], 10, true);
       //ship.play('fly');
       // Add enemy sprites to gameworld
       for(var x = 0; x < enemyCount; x++ ) {
-        enemies.push(game.add.sprite(200 + (x * 128), 200, 'ship'));
+        point = getEmptyPoint();
+
+        enemies.push(game.add.sprite(point.x * 32, point.y * 32, 'ship'));
       }
 
       // Apply physics and camera, second argument is debug mode
@@ -120,6 +159,10 @@ export default Ember.Route.extend({
 
       //add timer for 60 seconds, calling gameOver() when finished
       game.time.events.add(Phaser.Timer.SECOND * 15, nextRound, this);
+      var timer = game.time.create(false);
+      timer.loop(WATER_ANIM_SPEED, updateAnim, this);
+      timer.start();
+      game.world.swap(ship, ship.shipWake);
     }
 
     function enemyHit(body, bodyB, shapeA, shapeB, equation) {
@@ -155,6 +198,58 @@ export default Ember.Route.extend({
       }
     }
 
+    function updateAnim() {
+      switch(animFrame) {
+        case 0:
+          map.replace(0, 26);
+          break;
+        case 1:
+          map.replace(26,27);
+          break;
+        case 2:
+          map.replace(27,28);
+          break;
+        case 3:
+          map.replace(28,29);
+          break;
+        case 4:
+          map.replace(29,30);
+          break;
+        case 5:
+          map.replace(30,31);
+          break;
+        case 6:
+          map.replace(31,32);
+          break;
+        case 7:
+          map.replace(32, 33);
+          break;
+        case 8:
+          map.replace(33, 34);
+          break;
+        case 9:
+          map.replace(34, 35);
+          break;
+        case 10:
+          map.replace(35, 36);
+          break;
+        case 11:
+          map.replace(36, 37);
+          break;
+        case 12:
+          map.replace(37, 38);
+          break;
+        case 13:
+          map.replace(38, 39);
+          break;
+        case 14:
+          map.replace(39, 0);
+          animFrame = -1;
+          break;
+      }
+      animFrame++;
+    }
+
     function nextRound() {
       round++;
       game.time.events.add(Phaser.Timer.SECOND * 15, nextRound, this);
@@ -175,9 +270,16 @@ export default Ember.Route.extend({
     }
 
     function update() {
+
+      // Update wake to follow ship
+      ship.shipWake.x = ship.x;
+      ship.shipWake.y = ship.y;
+
+      // Update target position for each enemy ship
       enemies.forEach(function(enemy){
         updateAi(enemy);
       });
+
       // Set rotation to left and right arrow keys
       // Higher values relate to faster rotation
       if (cursors.left.isDown)
@@ -209,6 +311,143 @@ export default Ember.Route.extend({
     function render() {
       game.debug.text(result, 50, 50);
       game.debug.text("Round " + round + " time: " + parseInt((game.time.events.duration / 1000) + 1), 32, 20);
+    }
+
+    function place4x4IslandPrefab(mapArr) {
+      var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) }
+      var attempts = 0;
+      while (point.y > GAME_HEIGHT - 4 || point.x > GAME_WIDTH - 4 ||
+             mapArr[point.y][point.x] != 0 || mapArr[point.y+1][point.x] != 0 ||
+             mapArr[point.y][point.x+1] != 0 || mapArr[point.y+1][point.x+1] != 0 ||
+             mapArr[point.y][point.x+2] != 0 || mapArr[point.y+2][point.x] != 0 ||  mapArr[point.y+2][point.x+1] != 0 ||
+             mapArr[point.y+1][point.x+2] != 0 || mapArr[point.y+2][point.x+2] != 0 ||
+             mapArr[point.y][point.x+3] != 0 || mapArr[point.y+1][point.x+3] != 0 ||
+             mapArr[point.y+2][point.x+3] != 0 || mapArr[point.y+3][point.x+3] != 0 ||
+             mapArr[point.y+3][point.x+0] != 0 || mapArr[point.y+3][point.x+1] != 0 ||
+             mapArr[point.y+3][point.x+2] != 0 ) {
+        point.x = Math.floor(Math.random() * GAME_WIDTH);
+        point.y = Math.floor(Math.random() * GAME_HEIGHT);
+        attempts++;
+        if ( attempts > 10 ) {
+          break;
+        }
+      }
+
+      mapArr[point.y][point.x] = Math.floor(Math.random() * 2);
+      mapArr[point.y][point.x+1] = Math.floor(Math.random() * 2);
+      mapArr[point.y+1][point.x] = Math.floor(Math.random() * 2);
+      mapArr[point.y+1][point.x+1] = Math.floor(Math.random() * 2);
+      mapArr[point.y+2][point.x] = Math.floor(Math.random() * 2);
+      mapArr[point.y][point.x+2] = Math.floor(Math.random() * 2);
+      mapArr[point.y+1][point.x+2] = Math.floor(Math.random() * 2);
+      mapArr[point.y+2][point.x+1] = Math.floor(Math.random() * 2);
+      mapArr[point.y+2][point.x+2] = Math.floor(Math.random() * 2);
+      mapArr[point.y][point.x+3] = Math.floor(Math.random() * 2);
+      mapArr[point.y+1][point.x+3] = Math.floor(Math.random() * 2);
+      mapArr[point.y+2][point.x+3] = Math.floor(Math.random() * 2);
+      mapArr[point.y+3][point.x+3] = Math.floor(Math.random() * 2);
+      mapArr[point.y+3][point.x] = Math.floor(Math.random() * 2);
+      mapArr[point.y+3][point.x+1] = Math.floor(Math.random() * 2);
+      mapArr[point.y+3][point.x+2] = Math.floor(Math.random() * 2);
+
+      return mapArr;
+    }
+
+    function place3x3IslandPrefab(mapArr) {
+      var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) }
+      var attempts = 0;
+      while (point.y > GAME_HEIGHT - 3 || point.x > GAME_WIDTH - 3 ||
+             mapArr[point.y][point.x] != 0 || mapArr[point.y+1][point.x] != 0 ||
+             mapArr[point.y][point.x+1] != 0 || mapArr[point.y+1][point.x+1] != 0 ||
+             mapArr[point.y][point.x+2] != 0 || mapArr[point.y+2][point.x] != 0 ||  mapArr[point.y+2][point.x+1] != 0 ||
+             mapArr[point.y+1][point.x+2] != 0 || mapArr[point.y+2][point.x+2] != 0) {
+        point.x = Math.floor(Math.random() * GAME_WIDTH);
+        point.y = Math.floor(Math.random() * GAME_HEIGHT);
+        attempts++;
+        if ( attempts > 10 ) {
+          break;
+        }
+      }
+
+      mapArr[point.y][point.x] = Math.floor(Math.random() * 2);
+      mapArr[point.y][point.x+1] = Math.floor(Math.random() * 2);
+      mapArr[point.y+1][point.x] = Math.floor(Math.random() * 2);
+      mapArr[point.y+1][point.x+1] = Math.floor(Math.random() * 2);
+      mapArr[point.y+2][point.x] = Math.floor(Math.random() * 2);
+      mapArr[point.y][point.x+2] = Math.floor(Math.random() * 2);
+      mapArr[point.y+1][point.x+2] = Math.floor(Math.random() * 2);
+      mapArr[point.y+2][point.x+1] = Math.floor(Math.random() * 2);
+      mapArr[point.y+2][point.x+2] = Math.floor(Math.random() * 2);
+
+      return mapArr;
+    }
+
+    function place1x1IslandPrefab(mapArr) {
+      var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) }
+
+      while (mapArr[point.y][point.x] != 0 ) {
+        point.x = Math.floor(Math.random() * GAME_WIDTH);
+        point.y = Math.floor(Math.random() * GAME_HEIGHT);
+      }
+      mapArr[point.y][point.x] = 1;
+
+      return mapArr;
+    }
+
+    function place2x2IslandPrefab(mapArr) {
+      var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) }
+      var attempts = 0;
+      while (point.y > GAME_HEIGHT - 2 || point.x > GAME_WIDTH - 2 ||
+             mapArr[point.y][point.x] != 0 || mapArr[point.y+1][point.x] != 0 ||
+             mapArr[point.y][point.x+1] != 0 || mapArr[point.y+1][point.x+1] != 0 ) {
+        point.x = Math.floor(Math.random() * GAME_WIDTH);
+        point.y = Math.floor(Math.random() * GAME_HEIGHT);
+        attempts++;
+        if ( attempts > 10 ) {
+          break;
+        }
+      }
+      mapArr[point.y][point.x] = 1;
+      mapArr[point.y][point.x+1] = 1;
+      mapArr[point.y+1][point.x] = 1;
+      mapArr[point.y+1][point.x+1] = 1;
+
+      return mapArr;
+    }
+
+    function getEmptyPoint(){
+      var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) }
+      while (point.y < 2 || point.x < 2 || point.y > GAME_HEIGHT - 2 || point.x > GAME_WIDTH - 2 ||
+             mapArr[point.y][point.x] != 0 || mapArr[point.y+1][point.x] != 0 ||
+             mapArr[point.y][point.x+1] != 0 || mapArr[point.y+1][point.x+1] != 0 ) {
+
+        point.x = Math.floor(Math.random() * GAME_WIDTH);
+        point.y = Math.floor(Math.random() * GAME_HEIGHT);
+      }
+
+      return point;
+    }
+
+    function mapArrToString(mapArr){
+      var newMapArr = [];
+      for(var z = 0; z < mapArr.length; z++) {
+        if (mapArr[z] instanceof Array){
+          newMapArr[z] = mapArr[z].join(",")
+        }
+      }
+
+      return newMapArr.join("\n");
+    }
+
+    function generateEmptyMap(){
+      var mapArr = [];
+      for(var y = 0; y < GAME_HEIGHT; y++) {
+        mapArr[y] = [];
+        for(var x = 0; x < GAME_WIDTH; x++){
+          mapArr[y][x] = 0;
+        }
+      }
+      return mapArr;
     }
   }
 });
