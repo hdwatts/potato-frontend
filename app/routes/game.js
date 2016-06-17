@@ -127,8 +127,9 @@ export default Ember.Route.extend({
       //ship.play('fly');
       // Add enemy sprites to gameworld
       for(var x = 0; x < enemyCount; x++ ) {
-        point = getEmptyPoint();
-
+        do {
+          point = getEmptyPoint();
+        }while(Phaser.Math.distance(point.x * 32, point.y * 32, ship.x, ship.y) < 300)
         enemies.push(game.add.sprite(point.x * 32, point.y * 32, 'ship'));
       }
 
