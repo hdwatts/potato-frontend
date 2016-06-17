@@ -21,19 +21,19 @@ export default Ember.Route.extend({
         var prefab_id = Math.floor(Math.random() * 5);
         switch(prefab_id){
           case 0:
-            mapArr = place1x1IslandPrefab(mapArr);
-            break;
+          mapArr = place1x1IslandPrefab(mapArr);
+          break;
           case 1:
-            mapArr = place2x2IslandPrefab(mapArr);
-            break;
+          mapArr = place2x2IslandPrefab(mapArr);
+          break;
           case 2:
-            mapArr = place3x3IslandPrefab(mapArr);
-            break;
+          mapArr = place3x3IslandPrefab(mapArr);
+          break;
           case 3:
-            mapArr = place4x4IslandPrefab(mapArr);
-            break;
+          mapArr = place4x4IslandPrefab(mapArr);
+          break;
           case 4:
-            break;
+          break;
         }
       }
 
@@ -75,6 +75,13 @@ export default Ember.Route.extend({
     var MIN_PREFABS = 6;
     var MAX_PREFABS = 12;
 
+    // Game over variables
+    var menu;
+    var GAME_WIDTH_PX = 800;
+    var GAME_HEIGHT_PX = 608;
+    var newGameLabel;
+    var finalScore;
+
 
     // Instantiating gameworld, applying physics, animations
     // and sprites to map
@@ -106,7 +113,7 @@ export default Ember.Route.extend({
 
       // Add player sprite to gameworld
       var point = getEmptyPoint();
-      console.log("Ship Point: " + point.x + " - " + point.y)
+      console.log("Ship Point: " + point.x + " - " + point.y);
       ship = game.add.sprite(point.x * 32, point.y * 32, 'ship');
       ship.smoothed = false;
       ship.scale.set(0.75);
@@ -129,7 +136,8 @@ export default Ember.Route.extend({
       for(var x = 0; x < enemyCount; x++ ) {
         do {
           point = getEmptyPoint();
-        }while(Phaser.Math.distance(point.x * 32, point.y * 32, ship.x, ship.y) < 300)
+        }
+        while(Phaser.Math.distance(point.x * 32, point.y * 32, ship.x, ship.y) < 300);
         enemies.push(game.add.sprite(point.x * 32, point.y * 32, 'ship'));
       }
 
@@ -139,12 +147,12 @@ export default Ember.Route.extend({
 
       // Set bounding boxes of enemies and player
       // Arguments are (width, height, offsetX, offsetY, and rotation)
-      ship.body.setRectangle(32, 64);
+      ship.body.setRectangle(25, 64, -2, 5);
       enemies.forEach(function(enemy){
         //apply physics to enemy
         game.physics.p2.enable(enemy, false);
         enemy.scale.set(0.5);
-        enemy.body.setRectangle(32, 64);
+        enemy.body.setRectangle(18, 48, -1, 7);
       });
 
       // The first 4 parameters control if you need a boundary
@@ -188,10 +196,11 @@ export default Ember.Route.extend({
         if (body.sprite) 
         {
           result = 'You last hit: ' + body.sprite.key;
+          showFinalScore();
         }
         else 
         {
-          result = 'You last hit: the wall'
+          result = 'You last hit: the wall';
         }
       }
       else
@@ -200,54 +209,87 @@ export default Ember.Route.extend({
       }
     }
 
+    function showFinalScore() {
+      game.paused = true;
+
+      var dayPlural;
+
+      if (round === 1) {
+        dayPlural = ' day.';
+      } else {
+        dayPlural = ' days.';
+      }
+
+      menu = game.add.sprite(GAME_WIDTH_PX / 4, GAME_HEIGHT_PX / 2);
+      menu.anchor.setTo(0.5, 0.5);
+
+      finalScore = game.add.text(0, 0, 
+        "You evaded Euron's clutches for " + round + dayPlural,
+        { font: '24px Arial', fill: '#fff', align: 'center' });
+      newGameLabel = game.add.text(0, 0, 
+        "Click anywhere to try again", 
+        { font: '40px Arial', fill: '#fff', align: 'center' });
+
+      finalScore.fixedToCamera = true;
+      finalScore.cameraOffset.setTo(GAME_WIDTH_PX / 4, (GAME_HEIGHT_PX / 2) - 25);
+
+      newGameLabel.fixedToCamera = true;
+      newGameLabel.cameraOffset.setTo(GAME_WIDTH_PX / 4, (GAME_HEIGHT_PX / 2) + 25);
+
+      game.input.onDown.add(function() {
+        game.paused = false;
+        game.state.restart();
+      });
+    }
+
     function updateAnim() {
       switch(animFrame) {
         case 0:
-          map.replace(0, 26);
-          break;
+        map.replace(0, 26);
+        break;
         case 1:
-          map.replace(26,27);
-          break;
+        map.replace(26,27);
+        break;
         case 2:
-          map.replace(27,28);
-          break;
+        map.replace(27,28);
+        break;
         case 3:
-          map.replace(28,29);
-          break;
+        map.replace(28,29);
+        break;
         case 4:
-          map.replace(29,30);
-          break;
+        map.replace(29,30);
+        break;
         case 5:
-          map.replace(30,31);
-          break;
+        map.replace(30,31);
+        break;
         case 6:
-          map.replace(31,32);
-          break;
+        map.replace(31,32);
+        break;
         case 7:
-          map.replace(32, 33);
-          break;
+        map.replace(32, 33);
+        break;
         case 8:
-          map.replace(33, 34);
-          break;
+        map.replace(33, 34);
+        break;
         case 9:
-          map.replace(34, 35);
-          break;
+        map.replace(34, 35);
+        break;
         case 10:
-          map.replace(35, 36);
-          break;
+        map.replace(35, 36);
+        break;
         case 11:
-          map.replace(36, 37);
-          break;
+        map.replace(36, 37);
+        break;
         case 12:
-          map.replace(37, 38);
-          break;
+        map.replace(37, 38);
+        break;
         case 13:
-          map.replace(38, 39);
-          break;
+        map.replace(38, 39);
+        break;
         case 14:
-          map.replace(39, 0);
-          animFrame = -1;
-          break;
+        map.replace(39, 0);
+        animFrame = -1;
+        break;
       }
       animFrame++;
     }
@@ -258,8 +300,8 @@ export default Ember.Route.extend({
     }
 
     function moveTowardsPoint(enemy, x, y){
-        var speed = 60;
-        var angle = Math.atan2(y - enemy.y, x - enemy.x);
+      var speed = 60;
+      var angle = Math.atan2(y - enemy.y, x - enemy.x);
 
         // correct angle of angry bullets (depends on the sprite used)
         enemy.body.rotation = angle + game.math.degToRad(90); 
@@ -267,12 +309,12 @@ export default Ember.Route.extend({
         // accelerateToObject 
         enemy.body.force.x = Math.cos(angle) * speed; 
         enemy.body.force.y = Math.sin(angle) * speed;
-    }
-
-    function updateAI(enemy){
-      if(ship){
-        moveTowardsPoint(enemy, ship.x, ship.y);
       }
+
+      function updateAI(enemy){
+        if(ship){
+          moveTowardsPoint(enemy, ship.x, ship.y);
+        }
       //console.log(ship.position.x + ", " + ship.position.y)
     }
 
@@ -317,144 +359,144 @@ export default Ember.Route.extend({
 
     function render() {
       game.debug.text(result, 50, 50);
-      game.debug.text("Round " + round + " time: " + parseInt((game.time.events.duration / 1000) + 1), 32, 20);
+      game.debug.text("Round " + round + " time: " + parseInt((game.time.events.duration / 1000) + 1), 50, 75);
     }
 
     function place4x4IslandPrefab(mapArr) {
-      var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) }
+      var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) };
       var attempts = 0;
       while (point.y > GAME_HEIGHT - 4 || point.x > GAME_WIDTH - 4 ||
-             mapArr[point.y][point.x] != 0 || mapArr[point.y+1][point.x] != 0 ||
-             mapArr[point.y][point.x+1] != 0 || mapArr[point.y+1][point.x+1] != 0 ||
-             mapArr[point.y][point.x+2] != 0 || mapArr[point.y+2][point.x] != 0 ||  mapArr[point.y+2][point.x+1] != 0 ||
-             mapArr[point.y+1][point.x+2] != 0 || mapArr[point.y+2][point.x+2] != 0 ||
-             mapArr[point.y][point.x+3] != 0 || mapArr[point.y+1][point.x+3] != 0 ||
-             mapArr[point.y+2][point.x+3] != 0 || mapArr[point.y+3][point.x+3] != 0 ||
-             mapArr[point.y+3][point.x+0] != 0 || mapArr[point.y+3][point.x+1] != 0 ||
-             mapArr[point.y+3][point.x+2] != 0 ) {
+       mapArr[point.y][point.x] !== 0 || mapArr[point.y+1][point.x] !== 0 ||
+       mapArr[point.y][point.x+1] !== 0 || mapArr[point.y+1][point.x+1] !== 0 ||
+       mapArr[point.y][point.x+2] !== 0 || mapArr[point.y+2][point.x] !== 0 ||  mapArr[point.y+2][point.x+1] !== 0 ||
+       mapArr[point.y+1][point.x+2] !== 0 || mapArr[point.y+2][point.x+2] !== 0 ||
+       mapArr[point.y][point.x+3] !== 0 || mapArr[point.y+1][point.x+3] !== 0 ||
+       mapArr[point.y+2][point.x+3] !== 0 || mapArr[point.y+3][point.x+3] !== 0 ||
+       mapArr[point.y+3][point.x+0] !== 0 || mapArr[point.y+3][point.x+1] !== 0 ||
+       mapArr[point.y+3][point.x+2] !== 0 ) {
         point.x = Math.floor(Math.random() * GAME_WIDTH);
-        point.y = Math.floor(Math.random() * GAME_HEIGHT);
-        attempts++;
-        if ( attempts > 10 ) {
-          break;
-        }
+      point.y = Math.floor(Math.random() * GAME_HEIGHT);
+      attempts++;
+      if ( attempts > 10 ) {
+        break;
       }
-
-      mapArr[point.y][point.x] = Math.floor(Math.random() * 2);
-      mapArr[point.y][point.x+1] = Math.floor(Math.random() * 2);
-      mapArr[point.y+1][point.x] = Math.floor(Math.random() * 2);
-      mapArr[point.y+1][point.x+1] = Math.floor(Math.random() * 2);
-      mapArr[point.y+2][point.x] = Math.floor(Math.random() * 2);
-      mapArr[point.y][point.x+2] = Math.floor(Math.random() * 2);
-      mapArr[point.y+1][point.x+2] = Math.floor(Math.random() * 2);
-      mapArr[point.y+2][point.x+1] = Math.floor(Math.random() * 2);
-      mapArr[point.y+2][point.x+2] = Math.floor(Math.random() * 2);
-      mapArr[point.y][point.x+3] = Math.floor(Math.random() * 2);
-      mapArr[point.y+1][point.x+3] = Math.floor(Math.random() * 2);
-      mapArr[point.y+2][point.x+3] = Math.floor(Math.random() * 2);
-      mapArr[point.y+3][point.x+3] = Math.floor(Math.random() * 2);
-      mapArr[point.y+3][point.x] = Math.floor(Math.random() * 2);
-      mapArr[point.y+3][point.x+1] = Math.floor(Math.random() * 2);
-      mapArr[point.y+3][point.x+2] = Math.floor(Math.random() * 2);
-
-      return mapArr;
     }
 
-    function place3x3IslandPrefab(mapArr) {
-      var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) }
-      var attempts = 0;
-      while (point.y > GAME_HEIGHT - 3 || point.x > GAME_WIDTH - 3 ||
-             mapArr[point.y][point.x] != 0 || mapArr[point.y+1][point.x] != 0 ||
-             mapArr[point.y][point.x+1] != 0 || mapArr[point.y+1][point.x+1] != 0 ||
-             mapArr[point.y][point.x+2] != 0 || mapArr[point.y+2][point.x] != 0 ||  mapArr[point.y+2][point.x+1] != 0 ||
-             mapArr[point.y+1][point.x+2] != 0 || mapArr[point.y+2][point.x+2] != 0) {
-        point.x = Math.floor(Math.random() * GAME_WIDTH);
-        point.y = Math.floor(Math.random() * GAME_HEIGHT);
-        attempts++;
-        if ( attempts > 10 ) {
-          break;
-        }
-      }
+    mapArr[point.y][point.x] = Math.floor(Math.random() * 2);
+    mapArr[point.y][point.x+1] = Math.floor(Math.random() * 2);
+    mapArr[point.y+1][point.x] = Math.floor(Math.random() * 2);
+    mapArr[point.y+1][point.x+1] = Math.floor(Math.random() * 2);
+    mapArr[point.y+2][point.x] = Math.floor(Math.random() * 2);
+    mapArr[point.y][point.x+2] = Math.floor(Math.random() * 2);
+    mapArr[point.y+1][point.x+2] = Math.floor(Math.random() * 2);
+    mapArr[point.y+2][point.x+1] = Math.floor(Math.random() * 2);
+    mapArr[point.y+2][point.x+2] = Math.floor(Math.random() * 2);
+    mapArr[point.y][point.x+3] = Math.floor(Math.random() * 2);
+    mapArr[point.y+1][point.x+3] = Math.floor(Math.random() * 2);
+    mapArr[point.y+2][point.x+3] = Math.floor(Math.random() * 2);
+    mapArr[point.y+3][point.x+3] = Math.floor(Math.random() * 2);
+    mapArr[point.y+3][point.x] = Math.floor(Math.random() * 2);
+    mapArr[point.y+3][point.x+1] = Math.floor(Math.random() * 2);
+    mapArr[point.y+3][point.x+2] = Math.floor(Math.random() * 2);
 
-      mapArr[point.y][point.x] = Math.floor(Math.random() * 2);
-      mapArr[point.y][point.x+1] = Math.floor(Math.random() * 2);
-      mapArr[point.y+1][point.x] = Math.floor(Math.random() * 2);
-      mapArr[point.y+1][point.x+1] = Math.floor(Math.random() * 2);
-      mapArr[point.y+2][point.x] = Math.floor(Math.random() * 2);
-      mapArr[point.y][point.x+2] = Math.floor(Math.random() * 2);
-      mapArr[point.y+1][point.x+2] = Math.floor(Math.random() * 2);
-      mapArr[point.y+2][point.x+1] = Math.floor(Math.random() * 2);
-      mapArr[point.y+2][point.x+2] = Math.floor(Math.random() * 2);
+    return mapArr;
+  }
 
-      return mapArr;
-    }
-
-    function place1x1IslandPrefab(mapArr) {
-      var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) }
-
-      while (mapArr[point.y][point.x] != 0 ) {
-        point.x = Math.floor(Math.random() * GAME_WIDTH);
-        point.y = Math.floor(Math.random() * GAME_HEIGHT);
-      }
-      mapArr[point.y][point.x] = 1;
-
-      return mapArr;
-    }
-
-    function place2x2IslandPrefab(mapArr) {
-      var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) }
-      var attempts = 0;
-      while (point.y > GAME_HEIGHT - 2 || point.x > GAME_WIDTH - 2 ||
-             mapArr[point.y][point.x] != 0 || mapArr[point.y+1][point.x] != 0 ||
-             mapArr[point.y][point.x+1] != 0 || mapArr[point.y+1][point.x+1] != 0 ) {
-        point.x = Math.floor(Math.random() * GAME_WIDTH);
-        point.y = Math.floor(Math.random() * GAME_HEIGHT);
-        attempts++;
-        if ( attempts > 10 ) {
-          break;
-        }
-      }
-      mapArr[point.y][point.x] = 1;
-      mapArr[point.y][point.x+1] = 1;
-      mapArr[point.y+1][point.x] = 1;
-      mapArr[point.y+1][point.x+1] = 1;
-
-      return mapArr;
-    }
-
-    function getEmptyPoint(){
-      var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) }
-      while (point.y < 2 || point.x < 2 || point.y > GAME_HEIGHT - 2 || point.x > GAME_WIDTH - 2 ||
-             mapArr[point.y][point.x] != 0 || mapArr[point.y+1][point.x] != 0 ||
-             mapArr[point.y][point.x+1] != 0 || mapArr[point.y+1][point.x+1] != 0 ) {
-
-        point.x = Math.floor(Math.random() * GAME_WIDTH);
-        point.y = Math.floor(Math.random() * GAME_HEIGHT);
-      }
-
-      return point;
-    }
-
-    function mapArrToString(mapArr){
-      var newMapArr = [];
-      for(var z = 0; z < mapArr.length; z++) {
-        if (mapArr[z] instanceof Array){
-          newMapArr[z] = mapArr[z].join(",")
-        }
-      }
-
-      return newMapArr.join("\n");
-    }
-
-    function generateEmptyMap(){
-      var mapArr = [];
-      for(var y = 0; y < GAME_HEIGHT; y++) {
-        mapArr[y] = [];
-        for(var x = 0; x < GAME_WIDTH; x++){
-          mapArr[y][x] = 0;
-        }
-      }
-      return mapArr;
+  function place3x3IslandPrefab(mapArr) {
+    var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) };
+    var attempts = 0;
+    while (point.y > GAME_HEIGHT - 3 || point.x > GAME_WIDTH - 3 ||
+     mapArr[point.y][point.x] !== 0 || mapArr[point.y+1][point.x] !== 0 ||
+     mapArr[point.y][point.x+1] !== 0 || mapArr[point.y+1][point.x+1] !== 0 ||
+     mapArr[point.y][point.x+2] !== 0 || mapArr[point.y+2][point.x] !== 0 ||  mapArr[point.y+2][point.x+1] !== 0 ||
+     mapArr[point.y+1][point.x+2] !== 0 || mapArr[point.y+2][point.x+2] !== 0) {
+      point.x = Math.floor(Math.random() * GAME_WIDTH);
+    point.y = Math.floor(Math.random() * GAME_HEIGHT);
+    attempts++;
+    if ( attempts > 10 ) {
+      break;
     }
   }
+
+  mapArr[point.y][point.x] = Math.floor(Math.random() * 2);
+  mapArr[point.y][point.x+1] = Math.floor(Math.random() * 2);
+  mapArr[point.y+1][point.x] = Math.floor(Math.random() * 2);
+  mapArr[point.y+1][point.x+1] = Math.floor(Math.random() * 2);
+  mapArr[point.y+2][point.x] = Math.floor(Math.random() * 2);
+  mapArr[point.y][point.x+2] = Math.floor(Math.random() * 2);
+  mapArr[point.y+1][point.x+2] = Math.floor(Math.random() * 2);
+  mapArr[point.y+2][point.x+1] = Math.floor(Math.random() * 2);
+  mapArr[point.y+2][point.x+2] = Math.floor(Math.random() * 2);
+
+  return mapArr;
+}
+
+function place1x1IslandPrefab(mapArr) {
+  var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) };
+
+  while (mapArr[point.y][point.x] !== 0 ) {
+    point.x = Math.floor(Math.random() * GAME_WIDTH);
+    point.y = Math.floor(Math.random() * GAME_HEIGHT);
+  }
+  mapArr[point.y][point.x] = 1;
+
+  return mapArr;
+}
+
+function place2x2IslandPrefab(mapArr) {
+  var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) };
+  var attempts = 0;
+  while (point.y > GAME_HEIGHT - 2 || point.x > GAME_WIDTH - 2 ||
+   mapArr[point.y][point.x] !== 0 || mapArr[point.y+1][point.x] !== 0 ||
+   mapArr[point.y][point.x+1] !== 0 || mapArr[point.y+1][point.x+1] !== 0 ) {
+    point.x = Math.floor(Math.random() * GAME_WIDTH);
+  point.y = Math.floor(Math.random() * GAME_HEIGHT);
+  attempts++;
+  if ( attempts > 10 ) {
+    break;
+  }
+}
+mapArr[point.y][point.x] = 1;
+mapArr[point.y][point.x+1] = 1;
+mapArr[point.y+1][point.x] = 1;
+mapArr[point.y+1][point.x+1] = 1;
+
+return mapArr;
+}
+
+function getEmptyPoint(){
+  var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) };
+  while (point.y < 2 || point.x < 2 || point.y > GAME_HEIGHT - 2 || point.x > GAME_WIDTH - 2 ||
+   mapArr[point.y][point.x] !== 0 || mapArr[point.y-1][point.x] !== 0 ||
+   mapArr[point.y][point.x-1] !== 0 || mapArr[point.y-1][point.x-1] !== 0 ) {
+
+  point.x = Math.floor(Math.random() * GAME_WIDTH);
+  point.y = Math.floor(Math.random() * GAME_HEIGHT);
+}
+
+return point;
+}
+
+function mapArrToString(mapArr){
+  var newMapArr = [];
+  for(var z = 0; z < mapArr.length; z++) {
+    if (mapArr[z] instanceof Array){
+      newMapArr[z] = mapArr[z].join(",");
+    }
+  }
+
+  return newMapArr.join("\n");
+}
+
+function generateEmptyMap(){
+  var mapArr = [];
+  for(var y = 0; y < GAME_HEIGHT; y++) {
+    mapArr[y] = [];
+    for(var x = 0; x < GAME_WIDTH; x++){
+      mapArr[y][x] = 0;
+    }
+  }
+  return mapArr;
+}
+}
 });
