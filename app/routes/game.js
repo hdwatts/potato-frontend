@@ -53,7 +53,7 @@ export default Ember.Route.extend({
       //game.load.image(      'wizball',    '/assets/images/sprites/wizball.png');
       // Player sprite
       // game.load.spritesheet('ship',    '/assets/images/sprites/humstar.png', 32, 32);
-      game.load.image(      'ship',       '/assets/images/sprites/pirate_ship.png');
+      game.load.image(      'ship',       '/assets/images/sprites/pirate_ship_twomast.png');
 
       // Ship wake emitter
       game.load.image(      'wake',       '/assets/images/sprites/bubble.png');
