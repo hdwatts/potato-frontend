@@ -9,6 +9,447 @@ export default Ember.Route.extend({
         render: render
       });
 
+    //constants and globals
+    var map;
+    var mapArr;
+    var layer;
+    var exitBody;
+    var cursors;
+    var enemies = [];
+    var enemyCount = 1;
+    var ship;
+    var result = 'Move with the arrow keys';
+    var round;
+    var ROUND_LENGTH = 3;
+    var animFrame = 0;
+    var WATER_ANIM_SPEED = 200;
+    var GAME_WIDTH = 50;
+    var GAME_HEIGHT = 19;
+    var MIN_PREFABS = 6;
+    var MAX_PREFABS = 12;
+    // Game over variables
+    var menu;
+    var GAME_WIDTH_PX = 800;
+    var GAME_HEIGHT_PX = 608;
+    var newGameLabel;
+    var finalScore;
+
+    function preload(){
+
+      // Tilemap
+      game.load.tilemap('map', null, generateMap(), Phaser.Tilemap.CSV);
+      //game.load.tilemap(    'map',        '/assets/images/tilemaps/collision_tilemap.json', null, Phaser.Tilemap.TILED_JSON);
+      // Tiles
+      game.load.image(      'ground_1x1', '/assets/images/tiles/ground_1x1.png');
+      //game.load.image(      'walls_1x2',  '/assets/images/tiles/walls_1x2.png');
+      //game.load.image(      'tiles2',     '/assets/images/tiles/tiles2.png');
+      // Enemies
+      //game.load.image(      'wizball',    '/assets/images/sprites/wizball.png');
+      // Player sprite
+      // game.load.spritesheet('ship',    '/assets/images/sprites/humstar.png', 32, 32);
+      game.load.image(      'ship',       '/assets/images/sprites/pirate_ship_twomast.png');
+
+      // Ship wake emitter
+      game.load.image(      'wake',       '/assets/images/sprites/bubble.png');
+    }
+
+    // Instantiating gameworld, applying physics, animations
+    // and sprites to map
+    function create(){
+
+      // Instantiate first round
+      round = 1;
+
+      // P2 physics engine
+      game.physics.startSystem(Phaser.Physics.P2JS);
+
+      createMapAndObjects();
+      // Set game input to arrow keys
+      cursors = game.input.keyboard.createCursorKeys();
+      exitBody = undefined;
+      //add timer for 60 seconds, calling gameOver() when finished
+      game.time.events.add(Phaser.Timer.SECOND * ROUND_LENGTH, openExit, this);
+      var timer = game.time.create(false);
+      timer.loop(WATER_ANIM_SPEED, updateAnim, this);
+      timer.start();
+      game.world.swap(ship, ship.shipWake);
+    }
+
+    function enemyHit(body, bodyB, shapeA, shapeB, equation) {
+      //  The block hit something.
+      //  
+      //  This callback is sent 5 arguments:
+      //  
+      //  The Phaser.Physics.P2.Body it is in contact with. 
+      //  *This might be null* if the Body was created directly 
+      //  in the p2 world.
+      //  The p2.Body this Body is in contact with.
+      //  The Shape from this body that caused the contact.
+      //  The Shape from the contact body.
+      //  The Contact Equation data array.
+      //  
+      //  The first argument may be null or not have a sprite 
+      //  property, such as when you hit the world bounds.
+
+      if (body)
+      {
+        if (body.sprite) 
+        {
+          result = 'You last hit: ' + body.sprite.key;
+          showFinalScore();
+        }
+        else 
+        {
+          result = 'You last hit: the wall';
+        }
+      }
+      else
+      {
+        result = 'Move with the arrow keys';
+      }
+    }
+
+    function showFinalScore() {
+      game.paused = true;
+
+      var dayPlural;
+
+      if (round === 1) {
+        dayPlural = ' day.';
+      } else {
+        dayPlural = ' days.';
+      }
+
+      // Add end game text
+      finalScore = game.add.text(0, 0, 
+        "You evaded Euron's clutches for " + round + dayPlural,
+        { font: '24px Arial', fill: '#fff', align: 'center' });
+      newGameLabel = game.add.text(0, 0, 
+        "Click anywhere to try again", 
+        { font: '40px Arial', fill: '#fff', align: 'center' });
+
+      finalScore.fixedToCamera = true;
+      finalScore.cameraOffset.setTo(GAME_WIDTH_PX / 4, (GAME_HEIGHT_PX / 2) - 25);
+
+      newGameLabel.fixedToCamera = true;
+      newGameLabel.cameraOffset.setTo(GAME_WIDTH_PX / 4, (GAME_HEIGHT_PX / 2) + 25);
+
+      // Unpause and restart game
+      game.input.onDown.add(function() {
+        game.paused = false;
+        round = 1;
+        resetMap();
+      });
+    }
+
+    function resetMap() {
+      //game.world.removeAll(true);
+      //map.destroy();
+      //game.physics.clear();
+      ship.destroy();
+      enemies.forEach(function(enemy){
+        enemy.destroy();
+      });
+      game.physics.p2.clearTilemapLayerBodies(map, layer);
+      layer.destroy();
+      exitBody.destroy();
+      exitBody = undefined;
+      //console.log(game.physics.p2.getBodies());
+      game.physics.reset();
+      game.physics.p2.reset();
+      createMapAndObjects();
+      game.time.events.add(Phaser.Timer.SECOND * ROUND_LENGTH, openExit, this);
+
+      return true;
+    }
+
+    function updateAnim() {
+      switch(animFrame) {
+        case 0:
+        map.replace(0, 26);
+        break;
+        case 1:
+        map.replace(26,27);
+        break;
+        case 2:
+        map.replace(27,28);
+        break;
+        case 3:
+        map.replace(28,29);
+        break;
+        case 4:
+        map.replace(29,30);
+        break;
+        case 5:
+        map.replace(30,31);
+        break;
+        case 6:
+        map.replace(31,32);
+        break;
+        case 7:
+        map.replace(32, 33);
+        break;
+        case 8:
+        map.replace(33, 34);
+        break;
+        case 9:
+        map.replace(34, 35);
+        break;
+        case 10:
+        map.replace(35, 36);
+        break;
+        case 11:
+        map.replace(36, 37);
+        break;
+        case 12:
+        map.replace(37, 38);
+        break;
+        case 13:
+        map.replace(38, 39);
+        break;
+        case 14:
+        map.replace(39, 0);
+        animFrame = -1;
+        break;
+      }
+      animFrame++;
+    }
+
+    function openExit() {
+      if ( !exitBody ) {
+        do {
+          var point = getEmptyPoint();
+        } while(Phaser.Math.distance(point.x * 32, point.y * 32, ship.x, ship.y) < 300)
+        map.swap(map.getTile(point.x, point.y).index, 4, point.x, point.y, 1,1 );
+        //map.getTile(point.x, point.y).setCollision(true, true, true, true);
+        //map.getTile(point.x, point.y).setCollisionCallback(nextRound);
+        exitBody = game.physics.p2.createBody(point.x * 32, point.y * 32, 0);
+        exitBody.setRectangle(32, 32, 16, 16)
+        exitBody.createBodyCallback(ship, nextRound)
+        exitBody.addToWorld();
+      }
+      //map.setCollision(4, true);
+      //map.setTileLocationCallback(point.x, point.y, 1, 1, nextRound, ship, 0);
+      //round++;
+      //game.time.events.add(Phaser.Timer.SECOND * 15, nextRound, this);
+    }
+
+    function nextRound(sprite, tile) {
+      round++;
+      resetMap();
+
+      return true;
+    }
+
+    function moveTowardsPoint(enemy, x, y){
+      var speed = 60;
+      var angle = Math.atan2(y - enemy.y, x - enemy.x);
+
+        // correct angle of angry bullets (depends on the sprite used)
+        enemy.body.rotation = angle + game.math.degToRad(90); 
+
+        // accelerateToObject 
+        enemy.body.force.x = Math.cos(angle) * speed; 
+        enemy.body.force.y = Math.sin(angle) * speed;
+      }
+      function updateAI(enemy){
+        if(ship){
+          moveTowardsPoint(enemy, ship.x, ship.y);
+        }
+      //console.log(ship.position.x + ", " + ship.position.y)
+    }
+
+    function update() {
+
+      // Update wake to follow ship
+      ship.shipWake.x = ship.x;
+      ship.shipWake.y = ship.y;
+
+      // Update target position for each enemy ship
+      enemies.forEach(function(enemy){
+        updateAI(enemy);
+      });
+
+      // Set rotation to left and right arrow keys
+      // Higher values relate to faster rotation
+      if (cursors.left.isDown)
+      {
+        ship.body.rotateLeft(75);
+      }
+      else if (cursors.right.isDown)
+      {
+        ship.body.rotateRight(75);
+      }
+      else
+      {
+        ship.body.setZeroRotation();
+      }
+
+      // Set forward and reverse thrust to up and down arrow keys
+      // Higher values relate to faster acceleration
+      if (cursors.up.isDown)
+      {
+        ship.body.thrust(125);
+      }
+      else if (cursors.down.isDown)
+      {
+        ship.body.reverse(100);
+      }
+
+    }
+
+    function render() {
+      game.debug.text(result, 50, 50);
+      if (game.time.events.duration > 0){
+        game.debug.text("Round " + round + " time: " + parseInt((game.time.events.duration / 1000) + 1), 50, 75);
+      } else {
+        game.debug.text("The exit is open! Escape!", 50, 75);
+      }
+    }
+
+    function place4x4IslandPrefab(mapArr) {
+      var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) };
+      var attempts = 0;
+      while (point.y > GAME_HEIGHT - 4 || point.x > GAME_WIDTH - 4 ||
+       mapArr[point.y][point.x] !== 0 || mapArr[point.y+1][point.x] !== 0 ||
+       mapArr[point.y][point.x+1] !== 0 || mapArr[point.y+1][point.x+1] !== 0 ||
+       mapArr[point.y][point.x+2] !== 0 || mapArr[point.y+2][point.x] !== 0 ||  mapArr[point.y+2][point.x+1] !== 0 ||
+       mapArr[point.y+1][point.x+2] !== 0 || mapArr[point.y+2][point.x+2] !== 0 ||
+       mapArr[point.y][point.x+3] !== 0 || mapArr[point.y+1][point.x+3] !== 0 ||
+       mapArr[point.y+2][point.x+3] !== 0 || mapArr[point.y+3][point.x+3] !== 0 ||
+       mapArr[point.y+3][point.x+0] !== 0 || mapArr[point.y+3][point.x+1] !== 0 ||
+       mapArr[point.y+3][point.x+2] !== 0 ) 
+      {
+        point.x = Math.floor(Math.random() * GAME_WIDTH);
+        point.y = Math.floor(Math.random() * GAME_HEIGHT);
+        attempts++;
+        if ( attempts > 10 ) {
+          break;
+        }
+      }
+
+      mapArr[point.y][point.x] = Math.floor(Math.random() * 2);
+      mapArr[point.y][point.x+1] = Math.floor(Math.random() * 2);
+      mapArr[point.y+1][point.x] = Math.floor(Math.random() * 2);
+      mapArr[point.y+1][point.x+1] = Math.floor(Math.random() * 2);
+      mapArr[point.y+2][point.x] = Math.floor(Math.random() * 2);
+      mapArr[point.y][point.x+2] = Math.floor(Math.random() * 2);
+      mapArr[point.y+1][point.x+2] = Math.floor(Math.random() * 2);
+      mapArr[point.y+2][point.x+1] = Math.floor(Math.random() * 2);
+      mapArr[point.y+2][point.x+2] = Math.floor(Math.random() * 2);
+      mapArr[point.y][point.x+3] = Math.floor(Math.random() * 2);
+      mapArr[point.y+1][point.x+3] = Math.floor(Math.random() * 2);
+      mapArr[point.y+2][point.x+3] = Math.floor(Math.random() * 2);
+      mapArr[point.y+3][point.x+3] = Math.floor(Math.random() * 2);
+      mapArr[point.y+3][point.x] = Math.floor(Math.random() * 2);
+      mapArr[point.y+3][point.x+1] = Math.floor(Math.random() * 2);
+      mapArr[point.y+3][point.x+2] = Math.floor(Math.random() * 2);
+
+      return mapArr;
+    }
+
+    function place3x3IslandPrefab(mapArr) {
+      var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) };
+      var attempts = 0;
+      while (point.y > GAME_HEIGHT - 3 || point.x > GAME_WIDTH - 3 ||
+       mapArr[point.y][point.x] !== 0 || mapArr[point.y+1][point.x] !== 0 ||
+       mapArr[point.y][point.x+1] !== 0 || mapArr[point.y+1][point.x+1] !== 0 ||
+       mapArr[point.y][point.x+2] !== 0 || mapArr[point.y+2][point.x] !== 0 ||  mapArr[point.y+2][point.x+1] !== 0 ||
+       mapArr[point.y+1][point.x+2] !== 0 || mapArr[point.y+2][point.x+2] !== 0) 
+      {
+        point.x = Math.floor(Math.random() * GAME_WIDTH);
+        point.y = Math.floor(Math.random() * GAME_HEIGHT);
+        attempts++;
+        if ( attempts > 10 ) 
+        {
+          break;
+        }
+      }
+
+      mapArr[point.y][point.x] = Math.floor(Math.random() * 2);
+      mapArr[point.y][point.x+1] = Math.floor(Math.random() * 2);
+      mapArr[point.y+1][point.x] = Math.floor(Math.random() * 2);
+      mapArr[point.y+1][point.x+1] = Math.floor(Math.random() * 2);
+      mapArr[point.y+2][point.x] = Math.floor(Math.random() * 2);
+      mapArr[point.y][point.x+2] = Math.floor(Math.random() * 2);
+      mapArr[point.y+1][point.x+2] = Math.floor(Math.random() * 2);
+      mapArr[point.y+2][point.x+1] = Math.floor(Math.random() * 2);
+      mapArr[point.y+2][point.x+2] = Math.floor(Math.random() * 2);
+
+      return mapArr;
+    }
+
+    function place1x1IslandPrefab(mapArr) {
+      var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) };
+
+      while (mapArr[point.y][point.x] !== 0 ) {
+        point.x = Math.floor(Math.random() * GAME_WIDTH);
+        point.y = Math.floor(Math.random() * GAME_HEIGHT);
+      }
+      mapArr[point.y][point.x] = 1;
+
+      return mapArr;
+    }
+
+    function place2x2IslandPrefab(mapArr) {
+      var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) };
+      var attempts = 0;
+      while (point.y > GAME_HEIGHT - 2 || point.x > GAME_WIDTH - 2 ||
+       mapArr[point.y][point.x] !== 0 || mapArr[point.y+1][point.x] !== 0 ||
+       mapArr[point.y][point.x+1] !== 0 || mapArr[point.y+1][point.x+1] !== 0 ) 
+      {
+        point.x = Math.floor(Math.random() * GAME_WIDTH);
+        point.y = Math.floor(Math.random() * GAME_HEIGHT);
+        attempts++;
+        if ( attempts > 10 ) 
+        {
+          break;
+        }
+      }
+      mapArr[point.y][point.x] = 1;
+      mapArr[point.y][point.x+1] = 1;
+      mapArr[point.y+1][point.x] = 1;
+      mapArr[point.y+1][point.x+1] = 1;
+
+      return mapArr;
+    }
+
+    function getEmptyPoint(){
+      var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) };
+      while (point.y < 2 || point.x < 2 || point.y > GAME_HEIGHT - 2 || point.x > GAME_WIDTH - 2 ||
+       mapArr[point.y][point.x] !== 0 || mapArr[point.y-1][point.x] !== 0 ||
+       mapArr[point.y][point.x-1] !== 0 || mapArr[point.y-1][point.x-1] !== 0 ) 
+      {
+
+        point.x = Math.floor(Math.random() * GAME_WIDTH);
+        point.y = Math.floor(Math.random() * GAME_HEIGHT);
+      }
+
+      return point;
+    }
+
+    function mapArrToString(mapArr){
+      var newMapArr = [];
+      for(var z = 0; z < mapArr.length; z++) {
+        if (mapArr[z] instanceof Array){
+          newMapArr[z] = mapArr[z].join(",");
+        }
+      }
+
+      return newMapArr.join("\n");
+    }
+
+    function generateEmptyMap(){
+      var mapArr = [];
+      for(var y = 0; y < GAME_HEIGHT; y++) {
+        mapArr[y] = [];
+        for(var x = 0; x < GAME_WIDTH; x++){
+          mapArr[y][x] = 0;
+        }
+      }
+      return mapArr;
+    }
+
     function generateMap(){
       //generate empty map
       mapArr = generateEmptyMap();
@@ -39,60 +480,8 @@ export default Ember.Route.extend({
 
       return mapArrToString(mapArr);
     }
-    
-    function preload(){
 
-      // Tilemap
-      game.load.tilemap('map', null, generateMap(), Phaser.Tilemap.CSV);
-      //game.load.tilemap(    'map',        '/assets/images/tilemaps/collision_tilemap.json', null, Phaser.Tilemap.TILED_JSON);
-      // Tiles
-      game.load.image(      'ground_1x1', '/assets/images/tiles/ground_1x1.png');
-      //game.load.image(      'walls_1x2',  '/assets/images/tiles/walls_1x2.png');
-      //game.load.image(      'tiles2',     '/assets/images/tiles/tiles2.png');
-      // Enemies
-      //game.load.image(      'wizball',    '/assets/images/sprites/wizball.png');
-      // Player sprite
-      // game.load.spritesheet('ship',    '/assets/images/sprites/humstar.png', 32, 32);
-      game.load.image(      'ship',       '/assets/images/sprites/pirate_ship_twomast.png');
-
-      // Ship wake emitter
-      game.load.image(      'wake',       '/assets/images/sprites/bubble.png');
-    }
-
-    var map;
-    var mapArr;
-    var layer;
-    var cursors;
-    var enemies = [];
-    var enemyCount = 5;
-    var ship;
-    var result = 'Move with the arrow keys';
-    var round;
-    var animFrame = 0;
-    var WATER_ANIM_SPEED = 200;
-    var GAME_WIDTH = 50;
-    var GAME_HEIGHT = 19;
-    var MIN_PREFABS = 6;
-    var MAX_PREFABS = 12;
-
-    // Game over variables
-    var menu;
-    var GAME_WIDTH_PX = 800;
-    var GAME_HEIGHT_PX = 608;
-    var newGameLabel;
-    var finalScore;
-
-
-    // Instantiating gameworld, applying physics, animations
-    // and sprites to map
-    function create(){
-
-      // Instantiate first round
-      round = 1;
-
-      // P2 physics engine
-      game.physics.startSystem(Phaser.Physics.P2JS);
-
+    function createMapAndObjects(){
       //load tilemap with 32x32 pixel tiles, add the images and resize the world
       map = game.add.tilemap('map', 32, 32);
       game.stage.backgroundColor = '#0077be';
@@ -161,342 +550,13 @@ export default Ember.Route.extend({
       // should use its own collision group or not.
       game.physics.p2.setBoundsToWorld(true, true, true, true, false);
 
-      // Set game input to arrow keys
-      cursors = game.input.keyboard.createCursorKeys();
-
+      // The first 4 parameters control if you need a boundary
+      // on the left, right, top and bottom of your world.
+      // The final parameter (false) controls if the boundary 
+      // should use its own collision group or not.
       // Check for player sprite hitting an enemy
       ship.body.onBeginContact.add(enemyHit, this);
 
-      //add timer for 60 seconds, calling gameOver() when finished
-      game.time.events.add(Phaser.Timer.SECOND * 15, nextRound, this);
-      var timer = game.time.create(false);
-      timer.loop(WATER_ANIM_SPEED, updateAnim, this);
-      timer.start();
-      game.world.swap(ship, ship.shipWake);
-    }
-
-    function enemyHit(body, bodyB, shapeA, shapeB, equation) {
-      //  The block hit something.
-      //  
-      //  This callback is sent 5 arguments:
-      //  
-      //  The Phaser.Physics.P2.Body it is in contact with. 
-      //  *This might be null* if the Body was created directly 
-      //  in the p2 world.
-      //  The p2.Body this Body is in contact with.
-      //  The Shape from this body that caused the contact.
-      //  The Shape from the contact body.
-      //  The Contact Equation data array.
-      //  
-      //  The first argument may be null or not have a sprite 
-      //  property, such as when you hit the world bounds.
-
-      if (body)
-      {
-        if (body.sprite) 
-        {
-          result = 'You last hit: ' + body.sprite.key;
-          showFinalScore();
-        }
-        else 
-        {
-          result = 'You last hit: the wall';
-        }
-      }
-      else
-      {
-        result = 'Move with the arrow keys';
-      }
-    }
-
-    function showFinalScore() {
-      game.paused = true;
-
-      var dayPlural;
-
-      if (round === 1) {
-        dayPlural = ' day.';
-      } else {
-        dayPlural = ' days.';
-      }
-
-      menu = game.add.sprite(GAME_WIDTH_PX / 4, GAME_HEIGHT_PX / 2);
-      menu.anchor.setTo(0.5, 0.5);
-
-      finalScore = game.add.text(0, 0, 
-        "You evaded Euron's clutches for " + round + dayPlural,
-        { font: '24px Arial', fill: '#fff', align: 'center' });
-      newGameLabel = game.add.text(0, 0, 
-        "Click anywhere to try again", 
-        { font: '40px Arial', fill: '#fff', align: 'center' });
-
-      finalScore.fixedToCamera = true;
-      finalScore.cameraOffset.setTo(GAME_WIDTH_PX / 4, (GAME_HEIGHT_PX / 2) - 25);
-
-      newGameLabel.fixedToCamera = true;
-      newGameLabel.cameraOffset.setTo(GAME_WIDTH_PX / 4, (GAME_HEIGHT_PX / 2) + 25);
-
-      game.input.onDown.add(function() {
-        game.paused = false;
-        game.state.restart();
-      });
-    }
-
-    function updateAnim() {
-      switch(animFrame) {
-        case 0:
-        map.replace(0, 26);
-        break;
-        case 1:
-        map.replace(26,27);
-        break;
-        case 2:
-        map.replace(27,28);
-        break;
-        case 3:
-        map.replace(28,29);
-        break;
-        case 4:
-        map.replace(29,30);
-        break;
-        case 5:
-        map.replace(30,31);
-        break;
-        case 6:
-        map.replace(31,32);
-        break;
-        case 7:
-        map.replace(32, 33);
-        break;
-        case 8:
-        map.replace(33, 34);
-        break;
-        case 9:
-        map.replace(34, 35);
-        break;
-        case 10:
-        map.replace(35, 36);
-        break;
-        case 11:
-        map.replace(36, 37);
-        break;
-        case 12:
-        map.replace(37, 38);
-        break;
-        case 13:
-        map.replace(38, 39);
-        break;
-        case 14:
-        map.replace(39, 0);
-        animFrame = -1;
-        break;
-      }
-      animFrame++;
-    }
-
-    function nextRound() {
-      round++;
-      game.time.events.add(Phaser.Timer.SECOND * 15, nextRound, this);
-    }
-
-    function moveTowardsPoint(enemy, x, y){
-      var speed = 60;
-      var angle = Math.atan2(y - enemy.y, x - enemy.x);
-
-        // correct angle of angry bullets (depends on the sprite used)
-        enemy.body.rotation = angle + game.math.degToRad(90); 
-        
-        // accelerateToObject 
-        enemy.body.force.x = Math.cos(angle) * speed; 
-        enemy.body.force.y = Math.sin(angle) * speed;
-      }
-
-      function updateAI(enemy){
-        if(ship){
-          moveTowardsPoint(enemy, ship.x, ship.y);
-        }
-      //console.log(ship.position.x + ", " + ship.position.y)
-    }
-
-    function update() {
-
-      // Update wake to follow ship
-      ship.shipWake.x = ship.x;
-      ship.shipWake.y = ship.y;
-
-      // Update target position for each enemy ship
-      enemies.forEach(function(enemy){
-        updateAI(enemy);
-      });
-
-      // Set rotation to left and right arrow keys
-      // Higher values relate to faster rotation
-      if (cursors.left.isDown)
-      {
-        ship.body.rotateLeft(75);
-      }
-      else if (cursors.right.isDown)
-      {
-        ship.body.rotateRight(75);
-      }
-      else
-      {
-        ship.body.setZeroRotation();
-      }
-
-      // Set forward and reverse thrust to up and down arrow keys
-      // Higher values relate to faster acceleration
-      if (cursors.up.isDown)
-      {
-        ship.body.thrust(125);
-      }
-      else if (cursors.down.isDown)
-      {
-        ship.body.reverse(100);
-      }
-
-    }
-
-    function render() {
-      game.debug.text(result, 50, 50);
-      game.debug.text("Round " + round + " time: " + parseInt((game.time.events.duration / 1000) + 1), 50, 75);
-    }
-
-    function place4x4IslandPrefab(mapArr) {
-      var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) };
-      var attempts = 0;
-      while (point.y > GAME_HEIGHT - 4 || point.x > GAME_WIDTH - 4 ||
-       mapArr[point.y][point.x] !== 0 || mapArr[point.y+1][point.x] !== 0 ||
-       mapArr[point.y][point.x+1] !== 0 || mapArr[point.y+1][point.x+1] !== 0 ||
-       mapArr[point.y][point.x+2] !== 0 || mapArr[point.y+2][point.x] !== 0 ||  mapArr[point.y+2][point.x+1] !== 0 ||
-       mapArr[point.y+1][point.x+2] !== 0 || mapArr[point.y+2][point.x+2] !== 0 ||
-       mapArr[point.y][point.x+3] !== 0 || mapArr[point.y+1][point.x+3] !== 0 ||
-       mapArr[point.y+2][point.x+3] !== 0 || mapArr[point.y+3][point.x+3] !== 0 ||
-       mapArr[point.y+3][point.x+0] !== 0 || mapArr[point.y+3][point.x+1] !== 0 ||
-       mapArr[point.y+3][point.x+2] !== 0 ) {
-        point.x = Math.floor(Math.random() * GAME_WIDTH);
-      point.y = Math.floor(Math.random() * GAME_HEIGHT);
-      attempts++;
-      if ( attempts > 10 ) {
-        break;
-      }
-    }
-
-    mapArr[point.y][point.x] = Math.floor(Math.random() * 2);
-    mapArr[point.y][point.x+1] = Math.floor(Math.random() * 2);
-    mapArr[point.y+1][point.x] = Math.floor(Math.random() * 2);
-    mapArr[point.y+1][point.x+1] = Math.floor(Math.random() * 2);
-    mapArr[point.y+2][point.x] = Math.floor(Math.random() * 2);
-    mapArr[point.y][point.x+2] = Math.floor(Math.random() * 2);
-    mapArr[point.y+1][point.x+2] = Math.floor(Math.random() * 2);
-    mapArr[point.y+2][point.x+1] = Math.floor(Math.random() * 2);
-    mapArr[point.y+2][point.x+2] = Math.floor(Math.random() * 2);
-    mapArr[point.y][point.x+3] = Math.floor(Math.random() * 2);
-    mapArr[point.y+1][point.x+3] = Math.floor(Math.random() * 2);
-    mapArr[point.y+2][point.x+3] = Math.floor(Math.random() * 2);
-    mapArr[point.y+3][point.x+3] = Math.floor(Math.random() * 2);
-    mapArr[point.y+3][point.x] = Math.floor(Math.random() * 2);
-    mapArr[point.y+3][point.x+1] = Math.floor(Math.random() * 2);
-    mapArr[point.y+3][point.x+2] = Math.floor(Math.random() * 2);
-
-    return mapArr;
-  }
-
-  function place3x3IslandPrefab(mapArr) {
-    var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) };
-    var attempts = 0;
-    while (point.y > GAME_HEIGHT - 3 || point.x > GAME_WIDTH - 3 ||
-     mapArr[point.y][point.x] !== 0 || mapArr[point.y+1][point.x] !== 0 ||
-     mapArr[point.y][point.x+1] !== 0 || mapArr[point.y+1][point.x+1] !== 0 ||
-     mapArr[point.y][point.x+2] !== 0 || mapArr[point.y+2][point.x] !== 0 ||  mapArr[point.y+2][point.x+1] !== 0 ||
-     mapArr[point.y+1][point.x+2] !== 0 || mapArr[point.y+2][point.x+2] !== 0) {
-      point.x = Math.floor(Math.random() * GAME_WIDTH);
-    point.y = Math.floor(Math.random() * GAME_HEIGHT);
-    attempts++;
-    if ( attempts > 10 ) {
-      break;
     }
   }
-
-  mapArr[point.y][point.x] = Math.floor(Math.random() * 2);
-  mapArr[point.y][point.x+1] = Math.floor(Math.random() * 2);
-  mapArr[point.y+1][point.x] = Math.floor(Math.random() * 2);
-  mapArr[point.y+1][point.x+1] = Math.floor(Math.random() * 2);
-  mapArr[point.y+2][point.x] = Math.floor(Math.random() * 2);
-  mapArr[point.y][point.x+2] = Math.floor(Math.random() * 2);
-  mapArr[point.y+1][point.x+2] = Math.floor(Math.random() * 2);
-  mapArr[point.y+2][point.x+1] = Math.floor(Math.random() * 2);
-  mapArr[point.y+2][point.x+2] = Math.floor(Math.random() * 2);
-
-  return mapArr;
-}
-
-function place1x1IslandPrefab(mapArr) {
-  var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) };
-
-  while (mapArr[point.y][point.x] !== 0 ) {
-    point.x = Math.floor(Math.random() * GAME_WIDTH);
-    point.y = Math.floor(Math.random() * GAME_HEIGHT);
-  }
-  mapArr[point.y][point.x] = 1;
-
-  return mapArr;
-}
-
-function place2x2IslandPrefab(mapArr) {
-  var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) };
-  var attempts = 0;
-  while (point.y > GAME_HEIGHT - 2 || point.x > GAME_WIDTH - 2 ||
-   mapArr[point.y][point.x] !== 0 || mapArr[point.y+1][point.x] !== 0 ||
-   mapArr[point.y][point.x+1] !== 0 || mapArr[point.y+1][point.x+1] !== 0 ) {
-    point.x = Math.floor(Math.random() * GAME_WIDTH);
-  point.y = Math.floor(Math.random() * GAME_HEIGHT);
-  attempts++;
-  if ( attempts > 10 ) {
-    break;
-  }
-}
-mapArr[point.y][point.x] = 1;
-mapArr[point.y][point.x+1] = 1;
-mapArr[point.y+1][point.x] = 1;
-mapArr[point.y+1][point.x+1] = 1;
-
-return mapArr;
-}
-
-function getEmptyPoint(){
-  var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) };
-  while (point.y < 2 || point.x < 2 || point.y > GAME_HEIGHT - 2 || point.x > GAME_WIDTH - 2 ||
-   mapArr[point.y][point.x] !== 0 || mapArr[point.y-1][point.x] !== 0 ||
-   mapArr[point.y][point.x-1] !== 0 || mapArr[point.y-1][point.x-1] !== 0 ) {
-
-  point.x = Math.floor(Math.random() * GAME_WIDTH);
-  point.y = Math.floor(Math.random() * GAME_HEIGHT);
-}
-
-return point;
-}
-
-function mapArrToString(mapArr){
-  var newMapArr = [];
-  for(var z = 0; z < mapArr.length; z++) {
-    if (mapArr[z] instanceof Array){
-      newMapArr[z] = mapArr[z].join(",");
-    }
-  }
-
-  return newMapArr.join("\n");
-}
-
-function generateEmptyMap(){
-  var mapArr = [];
-  for(var y = 0; y < GAME_HEIGHT; y++) {
-    mapArr[y] = [];
-    for(var x = 0; x < GAME_WIDTH; x++){
-      mapArr[y][x] = 0;
-    }
-  }
-  return mapArr;
-}
-}
 });
