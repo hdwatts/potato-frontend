@@ -9,37 +9,25 @@ export default Ember.Route.extend({
         render: render
       });
 
-    function generateMap(){
-      //generate empty map
-      mapArr = generateEmptyMap();
+    //constants and globals
+    var map;
+    var mapArr;
+    var layer;
+    var exitBody;
+    var cursors;
+    var enemies = [];
+    var enemyCount = 3;
+    var ship;
+    var result = 'Move with the arrow keys';
+    var round;
+    var ROUND_LENGTH = 15;
+    var animFrame = 0;
+    var WATER_ANIM_SPEED = 200;
+    var GAME_WIDTH = 50;
+    var GAME_HEIGHT = 19;
+    var MIN_PREFABS = 6;
+    var MAX_PREFABS = 12;
 
-      //get random prefab objects
-      var numPrefabs = Math.floor(Math.random() * MAX_PREFABS + MIN_PREFABS);
-
-      for(var prefs = 0; prefs < numPrefabs; prefs++){
-        //place prefabs here
-        var prefab_id = Math.floor(Math.random() * 5);
-        switch(prefab_id){
-          case 0:
-            mapArr = place1x1IslandPrefab(mapArr);
-            break;
-          case 1:
-            mapArr = place2x2IslandPrefab(mapArr);
-            break;
-          case 2:
-            mapArr = place3x3IslandPrefab(mapArr);
-            break;
-          case 3:
-            mapArr = place4x4IslandPrefab(mapArr);
-            break;
-          case 4:
-            break;
-        }
-      }
-
-      return mapArrToString(mapArr);
-    }
-    
     function preload(){
 
       // Tilemap
@@ -59,23 +47,6 @@ export default Ember.Route.extend({
       game.load.image(      'wake',       '/assets/images/sprites/bubble.png');
     }
 
-    var map;
-    var mapArr;
-    var layer;
-    var cursors;
-    var enemies = [];
-    var enemyCount = 5;
-    var ship;
-    var result = 'Move with the arrow keys';
-    var round;
-    var animFrame = 0;
-    var WATER_ANIM_SPEED = 200;
-    var GAME_WIDTH = 50;
-    var GAME_HEIGHT = 19;
-    var MIN_PREFABS = 6;
-    var MAX_PREFABS = 12;
-
-
     // Instantiating gameworld, applying physics, animations
     // and sprites to map
     function create(){
@@ -86,81 +57,12 @@ export default Ember.Route.extend({
       // P2 physics engine
       game.physics.startSystem(Phaser.Physics.P2JS);
 
-      //load tilemap with 32x32 pixel tiles, add the images and resize the world
-      map = game.add.tilemap('map', 32, 32);
-      game.stage.backgroundColor = '#0077be';
-      map.addTilesetImage('ground_1x1');
-      layer = map.createLayer(0);
-      layer.resizeWorld();
-
-      // Tiles are collidable
-      map.setCollisionBetween(1, 12);
-
-      // Convert the tilemap layer into collision bodies
-      game.physics.p2.convertTilemap(map, layer);
-
-      // Sets bounciness of game physics
-      // Lower values are less bouncy
-      game.physics.p2.setImpactEvents(true);
-      game.physics.p2.restitution = 0.25;
-
-      // Add player sprite to gameworld
-      var point = getEmptyPoint();
-      console.log("Ship Point: " + point.x + " - " + point.y)
-      ship = game.add.sprite(point.x * 32, point.y * 32, 'ship');
-      ship.smoothed = false;
-      ship.scale.set(0.75);
-
-      // Add ship wake via arcade emitter
-      ship.shipWake = game.add.emitter(ship.x, ship.y + 32, 50);
-      ship.shipWake.width = 50;
-      ship.shipWake.makeParticles('wake');
-      ship.shipWake.setXSpeed(50, -50);
-      ship.shipWake.setYSpeed(50, -50);
-      ship.shipWake.setAlpha(1, 0.01, 500);
-      ship.shipWake.setScale(0.05, 0.5, 0.05, 0.5, 5000, Phaser.Easing.Quintic.Out);
-      ship.shipWake.start(false, 1000, 10);
-
-
-      // Add idle animations to the player sprite
-      //ship.animations.add('fly', [0,1,2,3,4,5], 10, true);
-      //ship.play('fly');
-      // Add enemy sprites to gameworld
-      for(var x = 0; x < enemyCount; x++ ) {
-        do {
-          point = getEmptyPoint();
-        }while(Phaser.Math.distance(point.x * 32, point.y * 32, ship.x, ship.y) < 300)
-        enemies.push(game.add.sprite(point.x * 32, point.y * 32, 'ship'));
-      }
-
-      // Apply physics and camera, second argument is debug mode
-      game.physics.p2.enable(ship, false);
-      game.camera.follow(ship);
-
-      // Set bounding boxes of enemies and player
-      // Arguments are (width, height, offsetX, offsetY, and rotation)
-      ship.body.setRectangle(32, 64);
-      enemies.forEach(function(enemy){
-        //apply physics to enemy
-        game.physics.p2.enable(enemy, false);
-        enemy.scale.set(0.5);
-        enemy.body.setRectangle(32, 64);
-      });
-
-      // The first 4 parameters control if you need a boundary
-      // on the left, right, top and bottom of your world.
-      // The final parameter (false) controls if the boundary 
-      // should use its own collision group or not.
-      game.physics.p2.setBoundsToWorld(true, true, true, true, false);
-
+      createMapAndObjects();
       // Set game input to arrow keys
       cursors = game.input.keyboard.createCursorKeys();
 
-      // Check for player sprite hitting an enemy
-      ship.body.onBeginContact.add(enemyHit, this);
-
       //add timer for 60 seconds, calling gameOver() when finished
-      game.time.events.add(Phaser.Timer.SECOND * 15, nextRound, this);
+      game.time.events.add(Phaser.Timer.SECOND * ROUND_LENGTH, openExit, this);
       var timer = game.time.create(false);
       timer.loop(WATER_ANIM_SPEED, updateAnim, this);
       timer.start();
@@ -252,9 +154,42 @@ export default Ember.Route.extend({
       animFrame++;
     }
 
-    function nextRound() {
+    function openExit() {
+      do {
+        var point = getEmptyPoint();
+      }while(Phaser.Math.distance(point.x * 32, point.y * 32, ship.x, ship.y) < 300)
+      map.swap(map.getTile(point.x, point.y).index, 4, point.x, point.y, 1,1 );
+      //map.getTile(point.x, point.y).setCollision(true, true, true, true);
+      //map.getTile(point.x, point.y).setCollisionCallback(nextRound);
+      exitBody = game.physics.p2.createBody(point.x * 32, point.y * 32, 0);
+      exitBody.setRectangle(32, 32, 16, 16)
+      exitBody.createBodyCallback(ship, nextRound)
+      exitBody.addToWorld();
+      //map.setCollision(4, true);
+      //map.setTileLocationCallback(point.x, point.y, 1, 1, nextRound, ship, 0);
+      //round++;
+      //game.time.events.add(Phaser.Timer.SECOND * 15, nextRound, this);
+    }
+
+    function nextRound(sprite, tile) {
+      //game.world.removeAll(true);
+      //map.destroy();
+      //game.physics.clear();
+      ship.destroy();
+      enemies.forEach(function(enemy){
+        enemy.destroy();
+      });
+      game.physics.p2.clearTilemapLayerBodies(map, layer);
+      layer.destroy();
+      exitBody.destroy();
+      //console.log(game.physics.p2.getBodies());
+      game.physics.reset();
+      game.physics.p2.reset();
+      createMapAndObjects();
       round++;
-      game.time.events.add(Phaser.Timer.SECOND * 15, nextRound, this);
+      game.time.events.add(Phaser.Timer.SECOND * ROUND_LENGTH, openExit, this);
+
+      return true;
     }
 
     function moveTowardsPoint(enemy, x, y){
@@ -263,7 +198,7 @@ export default Ember.Route.extend({
 
         // correct angle of angry bullets (depends on the sprite used)
         enemy.body.rotation = angle + game.math.degToRad(90); 
-        
+
         // accelerateToObject 
         enemy.body.force.x = Math.cos(angle) * speed; 
         enemy.body.force.y = Math.sin(angle) * speed;
@@ -273,7 +208,6 @@ export default Ember.Route.extend({
       if(ship){
         moveTowardsPoint(enemy, ship.x, ship.y);
       }
-      //console.log(ship.position.x + ", " + ship.position.y)
     }
 
     function update() {
@@ -317,7 +251,11 @@ export default Ember.Route.extend({
 
     function render() {
       game.debug.text(result, 50, 50);
-      game.debug.text("Round " + round + " time: " + parseInt((game.time.events.duration / 1000) + 1), 32, 20);
+      if (game.time.events.duration > 0){
+        game.debug.text("Round " + round + " time: " + parseInt((game.time.events.duration / 1000) + 1), 32, 20);
+      }else {
+        game.debug.text("The exit is open! Escape!", 32, 20);
+      }
     }
 
     function place4x4IslandPrefab(mapArr) {
@@ -455,6 +393,108 @@ export default Ember.Route.extend({
         }
       }
       return mapArr;
+    }
+
+    function generateMap(){
+      //generate empty map
+      mapArr = generateEmptyMap();
+
+      //get random prefab objects
+      var numPrefabs = Math.floor(Math.random() * MAX_PREFABS + MIN_PREFABS);
+
+      for(var prefs = 0; prefs < numPrefabs; prefs++){
+        //place prefabs here
+        var prefab_id = Math.floor(Math.random() * 5);
+        switch(prefab_id){
+          case 0:
+            mapArr = place1x1IslandPrefab(mapArr);
+            break;
+          case 1:
+            mapArr = place2x2IslandPrefab(mapArr);
+            break;
+          case 2:
+            mapArr = place3x3IslandPrefab(mapArr);
+            break;
+          case 3:
+            mapArr = place4x4IslandPrefab(mapArr);
+            break;
+          case 4:
+            break;
+        }
+      }
+
+      return mapArrToString(mapArr);
+    }
+
+    function createMapAndObjects(){
+      //load tilemap with 32x32 pixel tiles, add the images and resize the world
+      map = game.add.tilemap('map', 32, 32);
+      game.stage.backgroundColor = '#0077be';
+      map.addTilesetImage('ground_1x1');
+      layer = map.createLayer(0);
+      layer.resizeWorld();
+
+      // Tiles are collidable
+      map.setCollisionBetween(1, 12);
+
+      // Convert the tilemap layer into collision bodies
+      game.physics.p2.convertTilemap(map, layer);
+
+      // Sets bounciness of game physics
+      // Lower values are less bouncy
+      game.physics.p2.setImpactEvents(true);
+      game.physics.p2.restitution = 0.25;
+
+      // Add player sprite to gameworld
+      var point = getEmptyPoint();
+      //console.log("Ship Point: " + point.x + " - " + point.y)
+      ship = game.add.sprite(point.x * 32, point.y * 32, 'ship');
+      ship.smoothed = false;
+      ship.scale.set(0.75);
+
+      // Add ship wake via arcade emitter
+      ship.shipWake = game.add.emitter(ship.x, ship.y + 32, 50);
+      ship.shipWake.width = 50;
+      ship.shipWake.makeParticles('wake');
+      ship.shipWake.setXSpeed(50, -50);
+      ship.shipWake.setYSpeed(50, -50);
+      ship.shipWake.setAlpha(1, 0.01, 500);
+      ship.shipWake.setScale(0.05, 0.5, 0.05, 0.5, 5000, Phaser.Easing.Quintic.Out);
+      ship.shipWake.start(false, 1000, 10);
+
+
+      // Add idle animations to the player sprite
+      //ship.animations.add('fly', [0,1,2,3,4,5], 10, true);
+      //ship.play('fly');
+      // Add enemy sprites to gameworld
+      for(var x = 0; x < enemyCount; x++ ) {
+        do {
+          point = getEmptyPoint();
+        }while(Phaser.Math.distance(point.x * 32, point.y * 32, ship.x, ship.y) < 300)
+        enemies.push(game.add.sprite(point.x * 32, point.y * 32, 'ship'));
+      }
+
+      // Apply physics and camera, second argument is debug mode
+      game.physics.p2.enable(ship, false);
+      game.camera.follow(ship);
+      // Set bounding boxes of enemies and player
+      // Arguments are (width, height, offsetX, offsetY, and rotation)
+      ship.body.setRectangle(32, 64);
+      enemies.forEach(function(enemy){
+        //apply physics to enemy
+        game.physics.p2.enable(enemy, false);
+        enemy.scale.set(0.5);
+        enemy.body.setRectangle(32, 64);
+      });
+
+      game.physics.setBoundsToWorld(true, true, true, true, false);
+
+      // The first 4 parameters control if you need a boundary
+      // on the left, right, top and bottom of your world.
+      // The final parameter (false) controls if the boundary 
+      // should use its own collision group or not.
+      // Check for player sprite hitting an enemy
+      ship.body.onBeginContact.add(enemyHit, this);
     }
   }
 });
