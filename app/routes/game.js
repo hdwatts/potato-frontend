@@ -8,16 +8,38 @@ export default Ember.Route.extend({
         update: update,
         render: render
       });
+
+    function generateMap(){
+      return "1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1\n" +
+             "1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,1\n" +
+             "1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1\n" +
+             "1,0,0,1,1,1,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1\n" +
+             "1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,1\n" +
+             "1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,9,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1\n" +
+             "1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,1,0,1,0,0,1\n" +
+             "1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,1,1,1,0,0,1\n" +
+             "1,0,0,0,0,0,0,0,1,11,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,1,1,1,1,0,0,0,0,1,0,0,0,1\n" +
+             "1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,11,11,0,0,0,0,0,0,0,1,0,0,1,0,0,1,1,1,0,0,0,0,0,0,0,0,0,1\n" +
+             "1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,1,0,1,1,0,0,0,11,11,0,0,0,0,1,0,0,1,1,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1\n" +
+             "1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1\n" +
+             "1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1\n" +
+             "1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1\n" +
+             "1,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,1,9,1,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1\n" +
+             "1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1\n" +
+             "1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1\n" +
+             "1,1,1,1,1,9,1,1,1,1,1,9,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1"
+    }
     
     function preload(){
       // Tilemap
-      game.load.tilemap(    'map',        '/assets/images/tilemaps/collision_tilemap.json', null, Phaser.Tilemap.TILED_JSON);
+      game.load.tilemap('map', null, generateMap(), Phaser.Tilemap.CSV);
+      //game.load.tilemap(    'map',        '/assets/images/tilemaps/collision_tilemap.json', null, Phaser.Tilemap.TILED_JSON);
       // Tiles
       game.load.image(      'ground_1x1', '/assets/images/tiles/ground_1x1.png');
-      game.load.image(      'walls_1x2',  '/assets/images/tiles/walls_1x2.png');
-      game.load.image(      'tiles2',     '/assets/images/tiles/tiles2.png');
+      //game.load.image(      'walls_1x2',  '/assets/images/tiles/walls_1x2.png');
+      //game.load.image(      'tiles2',     '/assets/images/tiles/tiles2.png');
       // Enemies
-      game.load.image(      'wizball',    '/assets/images/sprites/wizball.png');
+      //game.load.image(      'wizball',    '/assets/images/sprites/wizball.png');
       // Player sprite
       // game.load.spritesheet('ship',    '/assets/images/sprites/humstar.png', 32, 32);
       game.load.image(      'ship',       '/assets/images/sprites/pirate_ship.png');
@@ -40,13 +62,10 @@ export default Ember.Route.extend({
       // P2 physics engine
       game.physics.startSystem(Phaser.Physics.P2JS);
 
-      map = game.add.tilemap('map');
+      //load tilemap with 32x32 pixel tiles, add the images and resize the world
+      map = game.add.tilemap('map', 32, 32);
       map.addTilesetImage('ground_1x1');
-      map.addTilesetImage('walls_1x2');
-      map.addTilesetImage('tiles2');
-
-      layer = map.createLayer('Tile Layer 1');
-
+      layer = map.createLayer(0);
       layer.resizeWorld();
 
       // Tiles are collidable
