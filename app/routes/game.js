@@ -16,17 +16,23 @@ export default Ember.Route.extend({
     var exitBody;
     var cursors;
     var enemies = [];
-    var enemyCount = 3;
+    var enemyCount = 1;
     var ship;
     var result = 'Move with the arrow keys';
     var round;
-    var ROUND_LENGTH = 15;
+    var ROUND_LENGTH = 3;
     var animFrame = 0;
     var WATER_ANIM_SPEED = 200;
     var GAME_WIDTH = 50;
     var GAME_HEIGHT = 19;
     var MIN_PREFABS = 6;
     var MAX_PREFABS = 12;
+    // Game over variables
+    var menu;
+    var GAME_WIDTH_PX = 800;
+    var GAME_HEIGHT_PX = 608;
+    var newGameLabel;
+    var finalScore;
 
     function preload(){
 
@@ -60,7 +66,7 @@ export default Ember.Route.extend({
       createMapAndObjects();
       // Set game input to arrow keys
       cursors = game.input.keyboard.createCursorKeys();
-
+      exitBody = undefined;
       //add timer for 60 seconds, calling gameOver() when finished
       game.time.events.add(Phaser.Timer.SECOND * ROUND_LENGTH, openExit, this);
       var timer = game.time.create(false);
@@ -90,10 +96,11 @@ export default Ember.Route.extend({
         if (body.sprite) 
         {
           result = 'You last hit: ' + body.sprite.key;
+          showFinalScore();
         }
         else 
         {
-          result = 'You last hit: the wall'
+          result = 'You last hit: the wall';
         }
       }
       else
@@ -102,76 +109,40 @@ export default Ember.Route.extend({
       }
     }
 
-    function updateAnim() {
-      switch(animFrame) {
-        case 0:
-          map.replace(0, 26);
-          break;
-        case 1:
-          map.replace(26,27);
-          break;
-        case 2:
-          map.replace(27,28);
-          break;
-        case 3:
-          map.replace(28,29);
-          break;
-        case 4:
-          map.replace(29,30);
-          break;
-        case 5:
-          map.replace(30,31);
-          break;
-        case 6:
-          map.replace(31,32);
-          break;
-        case 7:
-          map.replace(32, 33);
-          break;
-        case 8:
-          map.replace(33, 34);
-          break;
-        case 9:
-          map.replace(34, 35);
-          break;
-        case 10:
-          map.replace(35, 36);
-          break;
-        case 11:
-          map.replace(36, 37);
-          break;
-        case 12:
-          map.replace(37, 38);
-          break;
-        case 13:
-          map.replace(38, 39);
-          break;
-        case 14:
-          map.replace(39, 0);
-          animFrame = -1;
-          break;
+    function showFinalScore() {
+      game.paused = true;
+
+      var dayPlural;
+
+      if (round === 1) {
+        dayPlural = ' day.';
+      } else {
+        dayPlural = ' days.';
       }
-      animFrame++;
+
+      // Add end game text
+      finalScore = game.add.text(0, 0, 
+        "You evaded Euron's clutches for " + round + dayPlural,
+        { font: '24px Arial', fill: '#fff', align: 'center' });
+      newGameLabel = game.add.text(0, 0, 
+        "Click anywhere to try again", 
+        { font: '40px Arial', fill: '#fff', align: 'center' });
+
+      finalScore.fixedToCamera = true;
+      finalScore.cameraOffset.setTo(GAME_WIDTH_PX / 4, (GAME_HEIGHT_PX / 2) - 25);
+
+      newGameLabel.fixedToCamera = true;
+      newGameLabel.cameraOffset.setTo(GAME_WIDTH_PX / 4, (GAME_HEIGHT_PX / 2) + 25);
+
+      // Unpause and restart game
+      game.input.onDown.add(function() {
+        game.paused = false;
+        round = 1;
+        resetMap();
+      });
     }
 
-    function openExit() {
-      do {
-        var point = getEmptyPoint();
-      }while(Phaser.Math.distance(point.x * 32, point.y * 32, ship.x, ship.y) < 300)
-      map.swap(map.getTile(point.x, point.y).index, 4, point.x, point.y, 1,1 );
-      //map.getTile(point.x, point.y).setCollision(true, true, true, true);
-      //map.getTile(point.x, point.y).setCollisionCallback(nextRound);
-      exitBody = game.physics.p2.createBody(point.x * 32, point.y * 32, 0);
-      exitBody.setRectangle(32, 32, 16, 16)
-      exitBody.createBodyCallback(ship, nextRound)
-      exitBody.addToWorld();
-      //map.setCollision(4, true);
-      //map.setTileLocationCallback(point.x, point.y, 1, 1, nextRound, ship, 0);
-      //round++;
-      //game.time.events.add(Phaser.Timer.SECOND * 15, nextRound, this);
-    }
-
-    function nextRound(sprite, tile) {
+    function resetMap() {
       //game.world.removeAll(true);
       //map.destroy();
       //game.physics.clear();
@@ -182,19 +153,97 @@ export default Ember.Route.extend({
       game.physics.p2.clearTilemapLayerBodies(map, layer);
       layer.destroy();
       exitBody.destroy();
+      exitBody = undefined;
       //console.log(game.physics.p2.getBodies());
       game.physics.reset();
       game.physics.p2.reset();
       createMapAndObjects();
-      round++;
       game.time.events.add(Phaser.Timer.SECOND * ROUND_LENGTH, openExit, this);
 
       return true;
     }
 
+    function updateAnim() {
+      switch(animFrame) {
+        case 0:
+        map.replace(0, 26);
+        break;
+        case 1:
+        map.replace(26,27);
+        break;
+        case 2:
+        map.replace(27,28);
+        break;
+        case 3:
+        map.replace(28,29);
+        break;
+        case 4:
+        map.replace(29,30);
+        break;
+        case 5:
+        map.replace(30,31);
+        break;
+        case 6:
+        map.replace(31,32);
+        break;
+        case 7:
+        map.replace(32, 33);
+        break;
+        case 8:
+        map.replace(33, 34);
+        break;
+        case 9:
+        map.replace(34, 35);
+        break;
+        case 10:
+        map.replace(35, 36);
+        break;
+        case 11:
+        map.replace(36, 37);
+        break;
+        case 12:
+        map.replace(37, 38);
+        break;
+        case 13:
+        map.replace(38, 39);
+        break;
+        case 14:
+        map.replace(39, 0);
+        animFrame = -1;
+        break;
+      }
+      animFrame++;
+    }
+
+    function openExit() {
+      if ( !exitBody ) {
+        do {
+          var point = getEmptyPoint();
+        } while(Phaser.Math.distance(point.x * 32, point.y * 32, ship.x, ship.y) < 300)
+        map.swap(map.getTile(point.x, point.y).index, 4, point.x, point.y, 1,1 );
+        //map.getTile(point.x, point.y).setCollision(true, true, true, true);
+        //map.getTile(point.x, point.y).setCollisionCallback(nextRound);
+        exitBody = game.physics.p2.createBody(point.x * 32, point.y * 32, 0);
+        exitBody.setRectangle(32, 32, 16, 16)
+        exitBody.createBodyCallback(ship, nextRound)
+        exitBody.addToWorld();
+      }
+      //map.setCollision(4, true);
+      //map.setTileLocationCallback(point.x, point.y, 1, 1, nextRound, ship, 0);
+      //round++;
+      //game.time.events.add(Phaser.Timer.SECOND * 15, nextRound, this);
+    }
+
+    function nextRound(sprite, tile) {
+      round++;
+      resetMap();
+
+      return true;
+    }
+
     function moveTowardsPoint(enemy, x, y){
-        var speed = 60;
-        var angle = Math.atan2(y - enemy.y, x - enemy.x);
+      var speed = 60;
+      var angle = Math.atan2(y - enemy.y, x - enemy.x);
 
         // correct angle of angry bullets (depends on the sprite used)
         enemy.body.rotation = angle + game.math.degToRad(90); 
@@ -202,12 +251,12 @@ export default Ember.Route.extend({
         // accelerateToObject 
         enemy.body.force.x = Math.cos(angle) * speed; 
         enemy.body.force.y = Math.sin(angle) * speed;
-    }
-
-    function updateAI(enemy){
-      if(ship){
-        moveTowardsPoint(enemy, ship.x, ship.y);
       }
+      function updateAI(enemy){
+        if(ship){
+          moveTowardsPoint(enemy, ship.x, ship.y);
+        }
+      //console.log(ship.position.x + ", " + ship.position.y)
     }
 
     function update() {
@@ -252,24 +301,25 @@ export default Ember.Route.extend({
     function render() {
       game.debug.text(result, 50, 50);
       if (game.time.events.duration > 0){
-        game.debug.text("Round " + round + " time: " + parseInt((game.time.events.duration / 1000) + 1), 32, 20);
-      }else {
-        game.debug.text("The exit is open! Escape!", 32, 20);
+        game.debug.text("Round " + round + " time: " + parseInt((game.time.events.duration / 1000) + 1), 50, 75);
+      } else {
+        game.debug.text("The exit is open! Escape!", 50, 75);
       }
     }
 
     function place4x4IslandPrefab(mapArr) {
-      var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) }
+      var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) };
       var attempts = 0;
       while (point.y > GAME_HEIGHT - 4 || point.x > GAME_WIDTH - 4 ||
-             mapArr[point.y][point.x] != 0 || mapArr[point.y+1][point.x] != 0 ||
-             mapArr[point.y][point.x+1] != 0 || mapArr[point.y+1][point.x+1] != 0 ||
-             mapArr[point.y][point.x+2] != 0 || mapArr[point.y+2][point.x] != 0 ||  mapArr[point.y+2][point.x+1] != 0 ||
-             mapArr[point.y+1][point.x+2] != 0 || mapArr[point.y+2][point.x+2] != 0 ||
-             mapArr[point.y][point.x+3] != 0 || mapArr[point.y+1][point.x+3] != 0 ||
-             mapArr[point.y+2][point.x+3] != 0 || mapArr[point.y+3][point.x+3] != 0 ||
-             mapArr[point.y+3][point.x+0] != 0 || mapArr[point.y+3][point.x+1] != 0 ||
-             mapArr[point.y+3][point.x+2] != 0 ) {
+       mapArr[point.y][point.x] !== 0 || mapArr[point.y+1][point.x] !== 0 ||
+       mapArr[point.y][point.x+1] !== 0 || mapArr[point.y+1][point.x+1] !== 0 ||
+       mapArr[point.y][point.x+2] !== 0 || mapArr[point.y+2][point.x] !== 0 ||  mapArr[point.y+2][point.x+1] !== 0 ||
+       mapArr[point.y+1][point.x+2] !== 0 || mapArr[point.y+2][point.x+2] !== 0 ||
+       mapArr[point.y][point.x+3] !== 0 || mapArr[point.y+1][point.x+3] !== 0 ||
+       mapArr[point.y+2][point.x+3] !== 0 || mapArr[point.y+3][point.x+3] !== 0 ||
+       mapArr[point.y+3][point.x+0] !== 0 || mapArr[point.y+3][point.x+1] !== 0 ||
+       mapArr[point.y+3][point.x+2] !== 0 ) 
+      {
         point.x = Math.floor(Math.random() * GAME_WIDTH);
         point.y = Math.floor(Math.random() * GAME_HEIGHT);
         attempts++;
@@ -299,17 +349,19 @@ export default Ember.Route.extend({
     }
 
     function place3x3IslandPrefab(mapArr) {
-      var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) }
+      var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) };
       var attempts = 0;
       while (point.y > GAME_HEIGHT - 3 || point.x > GAME_WIDTH - 3 ||
-             mapArr[point.y][point.x] != 0 || mapArr[point.y+1][point.x] != 0 ||
-             mapArr[point.y][point.x+1] != 0 || mapArr[point.y+1][point.x+1] != 0 ||
-             mapArr[point.y][point.x+2] != 0 || mapArr[point.y+2][point.x] != 0 ||  mapArr[point.y+2][point.x+1] != 0 ||
-             mapArr[point.y+1][point.x+2] != 0 || mapArr[point.y+2][point.x+2] != 0) {
+       mapArr[point.y][point.x] !== 0 || mapArr[point.y+1][point.x] !== 0 ||
+       mapArr[point.y][point.x+1] !== 0 || mapArr[point.y+1][point.x+1] !== 0 ||
+       mapArr[point.y][point.x+2] !== 0 || mapArr[point.y+2][point.x] !== 0 ||  mapArr[point.y+2][point.x+1] !== 0 ||
+       mapArr[point.y+1][point.x+2] !== 0 || mapArr[point.y+2][point.x+2] !== 0) 
+      {
         point.x = Math.floor(Math.random() * GAME_WIDTH);
         point.y = Math.floor(Math.random() * GAME_HEIGHT);
         attempts++;
-        if ( attempts > 10 ) {
+        if ( attempts > 10 ) 
+        {
           break;
         }
       }
@@ -328,9 +380,9 @@ export default Ember.Route.extend({
     }
 
     function place1x1IslandPrefab(mapArr) {
-      var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) }
+      var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) };
 
-      while (mapArr[point.y][point.x] != 0 ) {
+      while (mapArr[point.y][point.x] !== 0 ) {
         point.x = Math.floor(Math.random() * GAME_WIDTH);
         point.y = Math.floor(Math.random() * GAME_HEIGHT);
       }
@@ -340,15 +392,17 @@ export default Ember.Route.extend({
     }
 
     function place2x2IslandPrefab(mapArr) {
-      var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) }
+      var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) };
       var attempts = 0;
       while (point.y > GAME_HEIGHT - 2 || point.x > GAME_WIDTH - 2 ||
-             mapArr[point.y][point.x] != 0 || mapArr[point.y+1][point.x] != 0 ||
-             mapArr[point.y][point.x+1] != 0 || mapArr[point.y+1][point.x+1] != 0 ) {
+       mapArr[point.y][point.x] !== 0 || mapArr[point.y+1][point.x] !== 0 ||
+       mapArr[point.y][point.x+1] !== 0 || mapArr[point.y+1][point.x+1] !== 0 ) 
+      {
         point.x = Math.floor(Math.random() * GAME_WIDTH);
         point.y = Math.floor(Math.random() * GAME_HEIGHT);
         attempts++;
-        if ( attempts > 10 ) {
+        if ( attempts > 10 ) 
+        {
           break;
         }
       }
@@ -361,10 +415,11 @@ export default Ember.Route.extend({
     }
 
     function getEmptyPoint(){
-      var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) }
+      var point = { x: Math.floor(Math.random() * GAME_WIDTH), y: Math.floor(Math.random() * GAME_HEIGHT) };
       while (point.y < 2 || point.x < 2 || point.y > GAME_HEIGHT - 2 || point.x > GAME_WIDTH - 2 ||
-             mapArr[point.y][point.x] != 0 || mapArr[point.y+1][point.x] != 0 ||
-             mapArr[point.y][point.x+1] != 0 || mapArr[point.y+1][point.x+1] != 0 ) {
+       mapArr[point.y][point.x] !== 0 || mapArr[point.y-1][point.x] !== 0 ||
+       mapArr[point.y][point.x-1] !== 0 || mapArr[point.y-1][point.x-1] !== 0 ) 
+      {
 
         point.x = Math.floor(Math.random() * GAME_WIDTH);
         point.y = Math.floor(Math.random() * GAME_HEIGHT);
@@ -377,7 +432,7 @@ export default Ember.Route.extend({
       var newMapArr = [];
       for(var z = 0; z < mapArr.length; z++) {
         if (mapArr[z] instanceof Array){
-          newMapArr[z] = mapArr[z].join(",")
+          newMapArr[z] = mapArr[z].join(",");
         }
       }
 
@@ -407,19 +462,19 @@ export default Ember.Route.extend({
         var prefab_id = Math.floor(Math.random() * 5);
         switch(prefab_id){
           case 0:
-            mapArr = place1x1IslandPrefab(mapArr);
-            break;
+          mapArr = place1x1IslandPrefab(mapArr);
+          break;
           case 1:
-            mapArr = place2x2IslandPrefab(mapArr);
-            break;
+          mapArr = place2x2IslandPrefab(mapArr);
+          break;
           case 2:
-            mapArr = place3x3IslandPrefab(mapArr);
-            break;
+          mapArr = place3x3IslandPrefab(mapArr);
+          break;
           case 3:
-            mapArr = place4x4IslandPrefab(mapArr);
-            break;
+          mapArr = place4x4IslandPrefab(mapArr);
+          break;
           case 4:
-            break;
+          break;
         }
       }
 
@@ -447,7 +502,7 @@ export default Ember.Route.extend({
 
       // Add player sprite to gameworld
       var point = getEmptyPoint();
-      //console.log("Ship Point: " + point.x + " - " + point.y)
+      console.log("Ship Point: " + point.x + " - " + point.y);
       ship = game.add.sprite(point.x * 32, point.y * 32, 'ship');
       ship.smoothed = false;
       ship.scale.set(0.75);
@@ -470,24 +525,30 @@ export default Ember.Route.extend({
       for(var x = 0; x < enemyCount; x++ ) {
         do {
           point = getEmptyPoint();
-        }while(Phaser.Math.distance(point.x * 32, point.y * 32, ship.x, ship.y) < 300)
+        }
+        while(Phaser.Math.distance(point.x * 32, point.y * 32, ship.x, ship.y) < 300);
         enemies.push(game.add.sprite(point.x * 32, point.y * 32, 'ship'));
       }
 
       // Apply physics and camera, second argument is debug mode
       game.physics.p2.enable(ship, false);
       game.camera.follow(ship);
+
       // Set bounding boxes of enemies and player
       // Arguments are (width, height, offsetX, offsetY, and rotation)
-      ship.body.setRectangle(32, 64);
+      ship.body.setRectangle(25, 64, -2, 5);
       enemies.forEach(function(enemy){
         //apply physics to enemy
         game.physics.p2.enable(enemy, false);
         enemy.scale.set(0.5);
-        enemy.body.setRectangle(32, 64);
+        enemy.body.setRectangle(18, 48, -1, 7);
       });
 
-      game.physics.setBoundsToWorld(true, true, true, true, false);
+      // The first 4 parameters control if you need a boundary
+      // on the left, right, top and bottom of your world.
+      // The final parameter (false) controls if the boundary 
+      // should use its own collision group or not.
+      game.physics.p2.setBoundsToWorld(true, true, true, true, false);
 
       // The first 4 parameters control if you need a boundary
       // on the left, right, top and bottom of your world.
@@ -495,6 +556,7 @@ export default Ember.Route.extend({
       // should use its own collision group or not.
       // Check for player sprite hitting an enemy
       ship.body.onBeginContact.add(enemyHit, this);
+
     }
   }
 });
