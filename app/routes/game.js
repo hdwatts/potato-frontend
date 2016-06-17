@@ -32,10 +32,9 @@ export default Ember.Route.extend({
 
     var map;
     var layer;
-    var layer2;
     var cursors;
     var enemies = [];
-    var enemyCount = 1;
+    var enemyCount = 5;
     var ship;
     var result = 'Move with the arrow keys';
     var round;
@@ -43,7 +42,10 @@ export default Ember.Route.extend({
     // Instantiating gameworld, applying physics, animations
     // and sprites to map
     function create(){
+
+      // Instantiate first round
       round = 1;
+
       // P2 physics engine
       game.physics.startSystem(Phaser.Physics.P2JS);
 
@@ -63,7 +65,6 @@ export default Ember.Route.extend({
 
       // Convert the tilemap layer into collision bodies
       game.physics.p2.convertTilemap(map, layer);
-      game.physics.p2.convertTilemap(map, layer2);
 
       // Sets bounciness of game physics
       // Lower values are less bouncy
@@ -85,14 +86,13 @@ export default Ember.Route.extend({
       ship.shipWake.setScale(0.05, 0.5, 0.05, 0.5, 5000, Phaser.Easing.Quintic.Out);
       ship.shipWake.start(false, 1000, 10);
 
-      ship.z = 1000;
 
       // Add idle animations to the player sprite
       //ship.animations.add('fly', [0,1,2,3,4,5], 10, true);
       //ship.play('fly');
       // Add enemy sprites to gameworld
       for(var x = 0; x < enemyCount; x++ ) {
-        enemies.push(game.add.sprite(200 + (x * 128), 200, 'ship'));
+        enemies.push(game.add.sprite(300 + (x * 128), 300, 'ship'));
       }
 
       // Apply physics and camera, second argument is debug mode
@@ -168,15 +168,20 @@ export default Ember.Route.extend({
     function moveTowardsPoint(enemy, x, y){
         var speed = 60;
         var angle = Math.atan2(y - enemy.y, x - enemy.x);
-        enemy.body.rotation = angle + game.math.degToRad(90);  // correct angle of angry bullets (depends on the sprite used)
-        enemy.body.force.x = Math.cos(angle) * speed;    // accelerateToObject 
+
+        // correct angle of angry bullets (depends on the sprite used)
+        enemy.body.rotation = angle + game.math.degToRad(90); 
+        
+        // accelerateToObject 
+        enemy.body.force.x = Math.cos(angle) * speed; 
         enemy.body.force.y = Math.sin(angle) * speed;
     }
 
-    function updateAi(enemy){
+    function updateAI(enemy){
       if(ship){
         moveTowardsPoint(enemy, ship.x, ship.y);
-      }//console.log(ship.position.x + ", " + ship.position.y)
+      }
+      //console.log(ship.position.x + ", " + ship.position.y)
     }
 
     function update() {
@@ -187,7 +192,7 @@ export default Ember.Route.extend({
 
       // Update target position for each enemy ship
       enemies.forEach(function(enemy){
-        updateAi(enemy);
+        updateAI(enemy);
       });
 
       // Set rotation to left and right arrow keys
@@ -209,7 +214,7 @@ export default Ember.Route.extend({
       // Higher values relate to faster acceleration
       if (cursors.up.isDown)
       {
-        ship.body.thrust(150);
+        ship.body.thrust(125);
       }
       else if (cursors.down.isDown)
       {
