@@ -134,7 +134,10 @@ export default Ember.Route.extend({
 
       _self.currentModel.set("score", score);
       _self.currentModel.set("days", round);
-      _self.currentModel.save();
+      _self.currentModel.save().then(function(record){
+          _self.currentModel.deleteRecord()
+          _self.currentModel = _self.model({username: username});
+      });
       //console.log(this.currentModel)
 
       // Add end game text
@@ -577,5 +580,8 @@ export default Ember.Route.extend({
       ship.body.onBeginContact.add(enemyHit, this);
 
     }
+  },
+  deactivate: function(){
+    Phaser.GAMES[0].paused = true
   }
 });

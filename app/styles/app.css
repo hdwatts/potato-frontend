@@ -62,6 +62,17 @@
   color: #000;
 }
 
+table {
+  margin-top: 75px;
+}
+
+canvas {
+  margin-top: 75px;
+}
+
+.masthead{
+  background-color: black;
+}
 /*td {
   border: 1px solid white;
 }*/
@@ -80,7 +91,6 @@ li.headlink:hover {
 .ember-view {
   height: 100%;
 }
-
 
 /*
  * Base structure
@@ -187,11 +197,11 @@ body {
  @media (min-width: 768px) {
   /* Pull out the header and footer */
   .masthead {
-    position: fixed;
+    position: absolute;
     top: 0;
   }
   .mastfoot {
-    position: fixed;
+    position: absolute;
     bottom: 0;
   }
   /* Start the vertical centering */
