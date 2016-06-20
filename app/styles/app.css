@@ -62,9 +62,9 @@
   color: #000;
 }
 
-td {
+/*td {
   border: 1px solid white;
-}
+}*/
 
 .headlink{
   cursor: pointer;
@@ -84,7 +84,7 @@ li.headlink:hover {
 
 /*
  * Base structure
- */
+ */ 
 
  html,
  body {

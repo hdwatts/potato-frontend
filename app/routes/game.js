@@ -1,7 +1,15 @@
 import Ember from 'ember';
 
 export default Ember.Route.extend({
+  model: function(params){
+    return this.store.createRecord('game', {
+      username:params["username"],
+      score:"0",
+      days:"0"
+    });
+  },
   activate: function(){
+    var _self = this;
     var game = new Phaser.Game(800, 608, Phaser.CANVAS, 'phaser', 
       { preload: preload,
         create: create,
@@ -20,6 +28,7 @@ export default Ember.Route.extend({
     var ship;
     var result = 'Move with the arrow keys';
     var round;
+    var score;
     var ROUND_LENGTH = 3;
     var animFrame = 0;
     var WATER_ANIM_SPEED = 200;
@@ -112,6 +121,7 @@ export default Ember.Route.extend({
     function showFinalScore() {
       game.paused = true;
 
+      var username = _self.currentModel.get('username');
       var dayPlural;
 
       if (round === 1) {
@@ -119,6 +129,13 @@ export default Ember.Route.extend({
       } else {
         dayPlural = ' days.';
       }
+
+      score = round; //TODO: add sore calculator
+
+      _self.currentModel.set("score", score);
+      _self.currentModel.set("days", round);
+      _self.currentModel.save();
+      //console.log(this.currentModel)
 
       // Add end game text
       finalScore = game.add.text(0, 0, 
@@ -152,8 +169,10 @@ export default Ember.Route.extend({
       });
       game.physics.p2.clearTilemapLayerBodies(map, layer);
       layer.destroy();
-      exitBody.destroy();
-      exitBody = undefined;
+      if ( exitBody ) {
+        exitBody.destroy();
+        exitBody = undefined;
+      }
       //console.log(game.physics.p2.getBodies());
       game.physics.reset();
       game.physics.p2.reset();
@@ -502,7 +521,7 @@ export default Ember.Route.extend({
 
       // Add player sprite to gameworld
       var point = getEmptyPoint();
-      console.log("Ship Point: " + point.x + " - " + point.y);
+      //console.log("Ship Point: " + point.x + " - " + point.y);
       ship = game.add.sprite(point.x * 32, point.y * 32, 'ship');
       ship.smoothed = false;
       ship.scale.set(0.75);

@@ -1,10 +1,15 @@
-<table>
-<tr><th>Username</th><th>Score</th></tr>
-{{#each model as |user|}}
-<tr>
-  <td>{{user.username}}</td>
-  <td>{{user.score}}</td>
-</tr>
-{{/each}}
+<table class="table table-inverse">
+<thead class="thead-default">
+  <tr><th>Username</th><th>Score</th><th>Days Alive</th></tr>
+</thead>
+<tbody>
+  {{#each model as |user|}}
+  <tr>
+    <td>{{user.username}}</td>
+    <td>{{user.score}}</td>
+    <td>{{user.days}}</td>
+  </tr>
+  {{/each}}
+</tbody>
 </table>
 {{outlet}}
