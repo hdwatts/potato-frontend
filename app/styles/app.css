@@ -2,6 +2,16 @@
  * Globals
  */
 
+@font-face {
+  font-family: 'game-of-thrones';
+  src: url('fonts/game-of-thrones.ttf');
+}
+
+.game-of-thrones {
+  font-family: 'game-of-thrones';
+  color: #efb835
+}
+
  /* Sigil on homepage */
 
  #sigil-container{
@@ -61,7 +71,7 @@
 
 #phaser {
   display: flex;
-
+  
 }
 
 #phaser {
@@ -230,6 +240,6 @@ body {
   .masthead,
   .mastfoot,
   .cover-container {
-    width: 700px;
+    width: 800px;
   }
 }
