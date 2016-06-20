@@ -33,24 +33,28 @@ export default Ember.Route.extend({
     var GAME_HEIGHT_PX = 608;
     var newGameLabel;
     var finalScore;
+    var gray;
 
     function preload(){
 
       // Tilemap
       game.load.tilemap('map', null, generateMap(), Phaser.Tilemap.CSV);
-      //game.load.tilemap(    'map',        '/assets/images/tilemaps/collision_tilemap.json', null, Phaser.Tilemap.TILED_JSON);
+      //game.load.tilemap(    'map',      '/assets/images/tilemaps/collision_tilemap.json', null, Phaser.Tilemap.TILED_JSON);
       // Tiles
       game.load.image(      'ground_1x1', '/assets/images/tiles/ground_1x1.png');
-      //game.load.image(      'walls_1x2',  '/assets/images/tiles/walls_1x2.png');
-      //game.load.image(      'tiles2',     '/assets/images/tiles/tiles2.png');
+      //game.load.image(      'walls_1x2','/assets/images/tiles/walls_1x2.png');
+      //game.load.image(      'tiles2',   '/assets/images/tiles/tiles2.png');
       // Enemies
-      //game.load.image(      'wizball',    '/assets/images/sprites/wizball.png');
+      //game.load.image(      'wizball',  '/assets/images/sprites/wizball.png');
       // Player sprite
       // game.load.spritesheet('ship',    '/assets/images/sprites/humstar.png', 32, 32);
       game.load.image(      'ship',       '/assets/images/sprites/pirate_ship_twomast.png');
 
       // Ship wake emitter
       game.load.image(      'wake',       '/assets/images/sprites/bubble.png');
+
+      // Grayscale for pause
+      game.load.script(     'gray',       'https://cdn.rawgit.com/photonstorm/phaser/master/filters/Gray.js');
     }
 
     // Instantiating gameworld, applying physics, animations
@@ -119,6 +123,15 @@ export default Ember.Route.extend({
     }
 
     function showFinalScore() {
+      // Gray out everything
+      gray = game.add.filter('gray');
+
+      ship.filters = [gray];
+      enemies.forEach(function(enemy){
+        enemy.filters = [gray];
+      });
+
+
       game.paused = true;
 
       var dayPlural;
@@ -277,7 +290,7 @@ export default Ember.Route.extend({
     }
 
     function patrolAI(enemy, x, y) {
-      
+
     }
 
     function updateAI(enemy){
@@ -298,6 +311,8 @@ export default Ember.Route.extend({
         // enemy.enemyWake.x = enemy.x;
         // enemy.enemyWake.y = enemy.y;
       });
+
+      // filter.update(game.input.activePointer);
 
       // Set rotation to left and right arrow keys
       // Higher values relate to faster rotation
