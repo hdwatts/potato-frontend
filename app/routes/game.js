@@ -193,6 +193,7 @@ export default Ember.Route.extend({
         //game.world.removeAll(true);
         //map.destroy();
         //game.physics.clear();
+        game.time.events.removeAll();
         game.input.onDown.remove(unpauseGame);
         ship.destroy();
 
