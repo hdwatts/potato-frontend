@@ -18,6 +18,11 @@ export default Ember.Route.extend({
     var enemies = [];
     var enemyCount = 3;
     var ship;
+    var shadow;
+    var enemyShadows = [];
+    // Offset for shadow
+    var offset = new Phaser.Point(5, 7);
+    var enemyOffset = new Phaser.Point(4, 6);
     var result = 'Move with the arrow keys';
     var round;
     var ROUND_LENGTH = 3;
@@ -33,7 +38,7 @@ export default Ember.Route.extend({
     var GAME_HEIGHT_PX = 608;
     var newGameLabel;
     var finalScore;
-    var gray;
+
 
     function preload(){
 
@@ -49,12 +54,11 @@ export default Ember.Route.extend({
       // Player sprite
       // game.load.spritesheet('ship',    '/assets/images/sprites/humstar.png', 32, 32);
       game.load.image(      'ship',       '/assets/images/sprites/pirate_ship_twomast.png');
+      game.load.image(      'enemy',      '/assets/images/sprites/pirate_ship_twomast_white.png');
 
       // Ship wake emitter
       game.load.image(      'wake',       '/assets/images/sprites/bubble.png');
 
-      // Grayscale for pause
-      game.load.script(     'gray',       'https://cdn.rawgit.com/photonstorm/phaser/master/filters/Gray.js');
     }
 
     // Instantiating gameworld, applying physics, animations
@@ -123,15 +127,6 @@ export default Ember.Route.extend({
     }
 
     function showFinalScore() {
-      // Gray out everything
-      gray = game.add.filter('gray');
-
-      ship.filters = [gray];
-      enemies.forEach(function(enemy){
-        enemy.filters = [gray];
-      });
-
-
       game.paused = true;
 
       var dayPlural;
@@ -289,8 +284,16 @@ export default Ember.Route.extend({
       enemy.body.force.y = Math.sin(angle) * speed;
     }
 
-    function patrolAI(enemy, x, y) {
+    function makePatrolRoute() {
 
+    }
+
+    function patrolAI(enemy, x, y) {
+      // Number of points in patrol, maximum is 5
+      var vertices = Math.floor(Math.random() * 7);
+
+
+      getEmptyPoint();
     }
 
     function updateAI(enemy){
@@ -305,12 +308,21 @@ export default Ember.Route.extend({
       ship.shipWake.x = ship.x;
       ship.shipWake.y = ship.y;
 
-      // Update target position and wake for each enemy ship
+      // Update shadow
+      shadow.x = ship.x + offset.x;
+      shadow.y = ship.y + offset.y;
+      shadow.angle = ship.angle;
+
+      // Update target position and shadow for each enemy ship
       enemies.forEach(function(enemy){
         updateAI(enemy);
-        // enemy.enemyWake.x = enemy.x;
-        // enemy.enemyWake.y = enemy.y;
       });
+
+      enemyShadows.forEach(function(shadow, index){
+        shadow.x = enemies[index].x + enemyOffset.x;
+        shadow.y = enemies[index].y + enemyOffset.y;
+        shadow.angle = enemies[index].angle;
+      })
 
       // filter.update(game.input.activePointer);
 
@@ -539,17 +551,27 @@ export default Ember.Route.extend({
       // Convert the tilemap layer into collision bodies
       game.physics.p2.convertTilemap(map, layer);
 
+      // Add player sprite to gameworld
+      var point = getEmptyPoint();
+      console.log("Ship Point: " + point.x + " - " + point.y);
+
+      // Shadow first
+      shadow = game.add.sprite(point.x * 32, point.y * 32, 'ship', 'shadow');
+      shadow.anchor.setTo(0.5, 0.5)
+      shadow.tint = 0x000000;
+      shadow.alpha = 0.6;
+      shadow.scale.set(0.75);
+
+
+      // Then ship
+      ship = game.add.sprite(point.x * 32, point.y * 32, 'ship');
+      ship.smoothed = false;
+      ship.scale.set(0.75);
+
       // Sets bounciness of game physics
       // Lower values are less bouncy
       game.physics.p2.setImpactEvents(true);
       game.physics.p2.restitution = 0.25;
-
-      // Add player sprite to gameworld
-      var point = getEmptyPoint();
-      console.log("Ship Point: " + point.x + " - " + point.y);
-      ship = game.add.sprite(point.x * 32, point.y * 32, 'ship');
-      ship.smoothed = false;
-      ship.scale.set(0.75);
 
       // Add ship wake via arcade emitter
       ship.shipWake = game.add.emitter(ship.x, ship.y + 32, 50);
@@ -572,7 +594,9 @@ export default Ember.Route.extend({
           point = getEmptyPoint();
         }
         while(Phaser.Math.distance(point.x * 32, point.y * 32, ship.x, ship.y) < 300);
-        enemies.push(game.add.sprite(point.x * 32, point.y * 32, 'ship'));
+
+        enemyShadows.push(game.add.sprite(point.x * 32, point.y * 32, 'enemy', 'shadow'));
+        enemies.push(game.add.sprite(point.x * 32, point.y * 32, 'enemy'));
       }
 
       // Add enemy wake via arcade emitter
@@ -594,11 +618,24 @@ export default Ember.Route.extend({
       // Set bounding boxes of enemies and player
       // Arguments are (width, height, offsetX, offsetY, and rotation)
       ship.body.setRectangle(25, 64, -2, 5);
+
+      enemyShadows.forEach(function(shadow) {
+        // Apply position to enemy shadows
+        shadow.anchor.setTo(0.5, 0.5);
+        shadow.tint = 0x000000;
+        shadow.alpha = 0.6;
+        shadow.scale.set(0.5);
+      });
+
       enemies.forEach(function(enemy){
         //apply physics to enemy
         game.physics.p2.enable(enemy, false);
         enemy.scale.set(0.5);
         enemy.body.setRectangle(18, 48, -1, 7);
+      });
+
+      enemies.forEach(function(enemy){
+
       });
 
       // The first 4 parameters control if you need a boundary
