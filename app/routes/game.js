@@ -16,7 +16,7 @@ export default Ember.Route.extend({
     var exitBody;
     var cursors;
     var enemies = [];
-    var enemyCount = 5;
+    var enemyCount = 3;
     var ship;
     var result = 'Move with the arrow keys';
     var round;
@@ -63,16 +63,25 @@ export default Ember.Route.extend({
       // P2 physics engine
       game.physics.startSystem(Phaser.Physics.P2JS);
 
+      // Helper function containing all placements
       createMapAndObjects();
+
       // Set game input to arrow keys
       cursors = game.input.keyboard.createCursorKeys();
       exitBody = undefined;
+
       //add timer for 60 seconds, calling gameOver() when finished
       game.time.events.add(Phaser.Timer.SECOND * ROUND_LENGTH, openExit, this);
       var timer = game.time.create(false);
       timer.loop(WATER_ANIM_SPEED, updateAnim, this);
       timer.start();
+
+      // Place wake behind ship sprites
       game.world.swap(ship, ship.shipWake);
+      // enemies.forEach(function(enemy){
+      //   game.world.swap(enemy, enemy.enemyWake);
+      // })
+
     }
 
     function enemyHit(body, bodyB, shapeA, shapeB, equation) {
@@ -147,17 +156,26 @@ export default Ember.Route.extend({
       //map.destroy();
       //game.physics.clear();
       ship.destroy();
+
       enemies.forEach(function(enemy){
         enemy.destroy();
+        // enemy.enemyWake.destroy();
       });
+
       game.physics.p2.clearTilemapLayerBodies(map, layer);
       layer.destroy();
-      exitBody.destroy();
-      exitBody = undefined;
+      if (exitBody) {
+        exitBody.destroy();
+        exitBody = undefined;
+      }
       //console.log(game.physics.p2.getBodies());
       game.physics.reset();
       game.physics.p2.reset();
       createMapAndObjects();
+
+      // Place wake behind ship sprites
+      game.world.swap(ship, ship.shipWake);
+
       game.time.events.add(Phaser.Timer.SECOND * ROUND_LENGTH, openExit, this);
 
       return true;
@@ -236,6 +254,11 @@ export default Ember.Route.extend({
 
     function nextRound(sprite, tile) {
       round++;
+
+      if (round % 2 == 0) {
+        enemyCount += 1;
+      }
+
       resetMap();
 
       return true;
@@ -245,18 +268,22 @@ export default Ember.Route.extend({
       var speed = 60;
       var angle = Math.atan2(y - enemy.y, x - enemy.x);
 
-        // correct angle of angry bullets (depends on the sprite used)
-        enemy.body.rotation = angle + game.math.degToRad(90); 
+      // correct angle of angry bullets (depends on the sprite used)
+      enemy.body.rotation = angle + game.math.degToRad(90); 
 
-        // accelerateToObject 
-        enemy.body.force.x = Math.cos(angle) * speed; 
-        enemy.body.force.y = Math.sin(angle) * speed;
+      // accelerateToObject 
+      enemy.body.force.x = Math.cos(angle) * speed; 
+      enemy.body.force.y = Math.sin(angle) * speed;
+    }
+
+    function patrolAI(enemy, x, y) {
+      
+    }
+
+    function updateAI(enemy){
+      if(ship){
+        moveTowardsPoint(enemy, ship.x, ship.y);
       }
-      function updateAI(enemy){
-        if(ship){
-          moveTowardsPoint(enemy, ship.x, ship.y);
-        }
-      //console.log(ship.position.x + ", " + ship.position.y)
     }
 
     function update() {
@@ -265,9 +292,11 @@ export default Ember.Route.extend({
       ship.shipWake.x = ship.x;
       ship.shipWake.y = ship.y;
 
-      // Update target position for each enemy ship
+      // Update target position and wake for each enemy ship
       enemies.forEach(function(enemy){
         updateAI(enemy);
+        // enemy.enemyWake.x = enemy.x;
+        // enemy.enemyWake.y = enemy.y;
       });
 
       // Set rotation to left and right arrow keys
@@ -509,18 +538,19 @@ export default Ember.Route.extend({
 
       // Add ship wake via arcade emitter
       ship.shipWake = game.add.emitter(ship.x, ship.y + 32, 50);
-      ship.shipWake.width = 50;
+      ship.shipWake.width = 30;
       ship.shipWake.makeParticles('wake');
       ship.shipWake.setXSpeed(50, -50);
       ship.shipWake.setYSpeed(50, -50);
       ship.shipWake.setAlpha(1, 0.01, 500);
       ship.shipWake.setScale(0.05, 0.5, 0.05, 0.5, 5000, Phaser.Easing.Quintic.Out);
-      ship.shipWake.start(false, 1000, 10);
+      ship.shipWake.start(false, 1500, 10);
 
 
       // Add idle animations to the player sprite
       //ship.animations.add('fly', [0,1,2,3,4,5], 10, true);
       //ship.play('fly');
+
       // Add enemy sprites to gameworld
       for(var x = 0; x < enemyCount; x++ ) {
         do {
@@ -529,6 +559,18 @@ export default Ember.Route.extend({
         while(Phaser.Math.distance(point.x * 32, point.y * 32, ship.x, ship.y) < 300);
         enemies.push(game.add.sprite(point.x * 32, point.y * 32, 'ship'));
       }
+
+      // Add enemy wake via arcade emitter
+      // enemies.forEach(function(enemy) {
+      //   enemy.enemyWake = game.add.emitter(enemy.x, enemy.y + 32, 50);
+      //   enemy.enemyWake.width = 20;
+      //   enemy.enemyWake.makeParticles('wake');
+      //   enemy.enemyWake.setXSpeed(50, -50);
+      //   enemy.enemyWake.setYSpeed(50, -50);
+      //   enemy.enemyWake.setAlpha(1, 0.01, 500);
+      //   enemy.enemyWake.setScale(0.05, 0.5, 0.05, 0.5, 5000, Phaser.Easing.Quintic.Out);
+      //   enemy.enemyWake.start(false, 1250, 20);
+      // })
 
       // Apply physics and camera, second argument is debug mode
       game.physics.p2.enable(ship, false);
