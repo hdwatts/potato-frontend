@@ -16,7 +16,7 @@ export default Ember.Route.extend({
     var exitBody;
     var cursors;
     var enemies = [];
-    var enemyCount = 1;
+    var enemyCount = 5;
     var ship;
     var result = 'Move with the arrow keys';
     var round;
