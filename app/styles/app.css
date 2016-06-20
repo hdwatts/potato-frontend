@@ -2,6 +2,15 @@
  * Globals
  */
 
+/* Instructions arrow rotation */
+
+#rotate-right {
+  -webkit-transform: rotate(90deg);
+  -ms-transform: rotate(90deg);
+  transform: rotate(90deg);
+}
+
+/* Fonts */
 @font-face {
   font-family: 'game-of-thrones';
   src: url('fonts/game-of-thrones.ttf');
