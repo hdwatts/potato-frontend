@@ -1,12 +1,19 @@
 import Ember from 'ember';
 
 export default Ember.Route.extend({
+  queryParams: {
+    username: ['username']
+  },
   model: function(params){
-    return this.store.createRecord('game', {
-      username:params["username"],
-      score:"0",
-      days:"0"
-    });
+    if (params["username"]) {
+      return this.store.createRecord('game', {
+        username:params["username"],
+        score:"0",
+        days:"0"
+      });
+    }else{
+      this.transitionTo('index');
+    }
   },
   activate: function(){
     var _self = this;
