@@ -28,7 +28,6 @@ export default Ember.Route.extend({
           update: update,
           render: render
         });
-
       //constants and globals
       var map;
       var mapArr;
@@ -45,7 +44,8 @@ export default Ember.Route.extend({
       var enemyOffset = new Phaser.Point(4, 6);
       var result = 'Move with the arrow keys';
       var round;
-      var ROUND_LENGTH = 3;
+      var score;
+      var ROUND_LENGTH = 15;
       var animFrame = 0;
       var WATER_ANIM_SPEED = 200;
       var GAME_WIDTH = 50;
@@ -60,7 +60,7 @@ export default Ember.Route.extend({
       var finalScore;
 
       function preload(){
-
+        window.scrollTo(0,document.body.scrollHeight);
         // Tilemap
         game.load.tilemap('map', null, generateMap(), Phaser.Tilemap.CSV);
         //game.load.tilemap(    'map',      '/assets/images/tilemaps/collision_tilemap.json', null, Phaser.Tilemap.TILED_JSON);
@@ -181,17 +181,19 @@ export default Ember.Route.extend({
         newGameLabel.cameraOffset.setTo(GAME_WIDTH_PX / 4, (GAME_HEIGHT_PX / 2) + 25);
 
         // Unpause and restart game
-        game.input.onDown.add(function() {
+        game.input.onDown.add(unpauseGame);
+      }
+      function unpauseGame() {
           game.paused = false;
           round = 1;
           resetMap();
-        });
       }
 
       function resetMap() {
         //game.world.removeAll(true);
         //map.destroy();
         //game.physics.clear();
+        game.input.onDown.remove(unpauseGame);
         ship.destroy();
 
         enemies.forEach(function(enemy){
@@ -222,48 +224,63 @@ export default Ember.Route.extend({
         switch(animFrame) {
           case 0:
           map.replace(0, 26);
+          map.replace(4, 5);
           break;
           case 1:
           map.replace(26,27);
+          map.replace(5, 6);
           break;
           case 2:
           map.replace(27,28);
+          map.replace(6, 7);
           break;
           case 3:
           map.replace(28,29);
+          map.replace(7, 8);
           break;
           case 4:
           map.replace(29,30);
+          map.replace(8, 9);
           break;
           case 5:
           map.replace(30,31);
+          map.replace(9, 10);
           break;
           case 6:
           map.replace(31,32);
+          map.replace(10, 11);
           break;
           case 7:
           map.replace(32, 33);
+          map.replace(11, 4);
           break;
           case 8:
           map.replace(33, 34);
+          map.replace(4, 5);
           break;
           case 9:
           map.replace(34, 35);
+          map.replace(5, 6);
           break;
           case 10:
           map.replace(35, 36);
+          map.replace(6, 7);
           break;
           case 11:
           map.replace(36, 37);
+          map.replace(7, 8);
           break;
           case 12:
           map.replace(37, 38);
+          map.replace(8, 9);
           break;
           case 13:
           map.replace(38, 39);
+          map.replace(9, 10);
           break;
           case 14:
           map.replace(39, 0);
+          map.replace(10, 4);
           animFrame = -1;
           break;
         }

@@ -1,11 +1,12 @@
 <table class="table table-inverse">
 <thead class="thead-default">
-  <tr><th>Username</th><th>Score</th><th>Days Alive</th></tr>
+  <tr><th>#</th><th>Username</th><th>Score</th><th>Days Alive</th></tr>
 </thead>
 <tbody>
   {{#each model as |game index|}}
     {{#unless game.isNew }}
       <tr>
+        <th scope="row">{{index}}</th>
         <td>{{game.username}}</td>
         <td>{{game.score}}</td>
         <td>{{game.days}}</td>
