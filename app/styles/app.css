@@ -10,6 +10,16 @@
   text-align: center;
 }
 
+#username-input{
+  position: absolute;
+  z-index: 1;
+  height: auto;
+  margin-top: 250px;
+  margin-left: -75px;
+  text-align: center;
+  color:black;
+}
+
 #sigil-btn {
   position: absolute;
   margin-top: 275px;
@@ -62,9 +72,20 @@
   color: #000;
 }
 
-td {
-  border: 1px solid white;
+table {
+  margin-top: 75px;
 }
+
+canvas {
+  margin-top: 75px;
+}
+
+.masthead{
+  background-color: black;
+}
+/*td {
+  border: 1px solid white;
+}*/
 
 .headlink{
   cursor: pointer;
@@ -81,10 +102,9 @@ li.headlink:hover {
   height: 100%;
 }
 
-
 /*
  * Base structure
- */
+ */ 
 
  html,
  body {
@@ -187,11 +207,11 @@ body {
  @media (min-width: 768px) {
   /* Pull out the header and footer */
   .masthead {
-    position: fixed;
+    position: absolute;
     top: 0;
   }
   .mastfoot {
-    position: fixed;
+    position: absolute;
     bottom: 0;
   }
   /* Start the vertical centering */
