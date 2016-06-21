@@ -40,6 +40,7 @@ export default Ember.Route.extend({
       var ship;
       var shadow;
       var enemyShadows = [];
+      var explosion;
       // Offset for shadow
       var offset = new Phaser.Point(5, 7);
       var enemyOffset = new Phaser.Point(4, 6);
@@ -76,6 +77,10 @@ export default Ember.Route.extend({
 
         // Ship wake emitter
         game.load.image(      'wake',       '/assets/images/sprites/bubble.png');
+
+        // Explosion splinters
+        game.load.image(      'splinter1',       '/assets/images/splinter1.png');
+        game.load.image(      'splinter2',       '/assets/images/splinter2.png');        
       }
 
       // Instantiating gameworld, applying physics, animations
@@ -126,11 +131,14 @@ export default Ember.Route.extend({
         {
           if (body.sprite)
           {
+
             var v1 = new Phaser.Point(ship.body.velocity.x, ship.body.velocity.y);
             var v2 = new Phaser.Point(body.velocity.x, body.velocity.y);
 
             // calculate difference 
             var v = Math.floor(Math.abs( v1.x - v2.x ) + Math.abs( v1.y - v2.y ));
+
+            playExplosion(ship.x, ship.y, v);
             health = Math.max(health - v, 0);
             result = 'Health: ' + health;
             if (health === 0){
@@ -146,6 +154,36 @@ export default Ember.Route.extend({
         {
           //result = 'Move with the arrow keys';
         }
+      }
+
+      function playExplosion(x, y, healthLoss) {
+        explosion = game.add.emitter(x, y, 6);
+
+        // Splinter 1
+        explosion.makeParticles('splinter1');
+        explosion.width = 35;
+        explosion.height = 35;
+        explosion.minParticleScale = 0.1;
+        explosion.maxParticleScale = 0.2;
+        explosion.minParticleSpeed.set(0, 30);
+        explosion.maxParticleSpeed.set(0, 100);
+        explosion.gravity = 0;
+
+        var splinterCount = 0;
+        
+        if (healthLoss < 200) {
+          splinterCount = 1;
+        } else if (healthLoss < 400) {
+          splinterCount = 3;
+        } else if (healthLoss < 600) {
+          splinterCount = 4;
+        } else if (healthLoss < 800) {
+          splinterCount = 5;
+        } else {
+          splinterCount = 6;
+        }
+
+        explosion.start(false, 1000, 50, splinterCount);  
       }
 
       function showFinalScore() {
@@ -165,8 +203,8 @@ export default Ember.Route.extend({
         _self.currentModel.set("score", score);
         _self.currentModel.set("days", round);
         _self.currentModel.save().then(function(){
-            _self.currentModel.deleteRecord();
-            _self.currentModel = _self.model({username: username});
+          _self.currentModel.deleteRecord();
+          _self.currentModel = _self.model({username: username});
         });
         //console.log(this.currentModel)
 
@@ -188,11 +226,11 @@ export default Ember.Route.extend({
         game.input.onDown.add(unpauseGame);
       }
       function unpauseGame() {
-          game.paused = false;
-          health = 1000;
-          result = 'Health: ' + health;
-          round = 1;
-          resetMap();
+        game.paused = false;
+        health = 1000;
+        result = 'Health: ' + health;
+        round = 1;
+        resetMap();
       }
 
       function resetMap() {
