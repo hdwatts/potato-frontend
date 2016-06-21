@@ -61,8 +61,7 @@ export default Ember.Route.extend({
 
       function preload(){
         window.scrollTo(0,document.body.scrollHeight);
-        // Tilemap
-        game.load.tilemap('map', null, generateMap(), Phaser.Tilemap.CSV);
+        
         //game.load.tilemap(    'map',      '/assets/images/tilemaps/collision_tilemap.json', null, Phaser.Tilemap.TILED_JSON);
         // Tiles
         game.load.image(      'ground_1x1', '/assets/images/tiles/ground_1x1.png');
@@ -556,6 +555,8 @@ export default Ember.Route.extend({
 
       function createMapAndObjects(){
         //load tilemap with 32x32 pixel tiles, add the images and resize the world
+        game.cache.addTilemap('map', null, generateMap(), Phaser.Tilemap.CSV);
+        console.log(game.cache);
         map = game.add.tilemap('map', 32, 32);
         game.stage.backgroundColor = '#0077be';
         map.addTilesetImage('ground_1x1');
