@@ -46,7 +46,7 @@ export default Ember.Route.extend({
       var enemyOffset = new Phaser.Point(4, 6);
       var result = 'Health: ' + health;
       var round;
-      var score;
+      var score = 0;
       var ROUND_LENGTH = 15;
       var animFrame = 0;
       var WATER_ANIM_SPEED = 200;
@@ -170,7 +170,7 @@ export default Ember.Route.extend({
         explosion.gravity = 0;
 
         var splinterCount = 0;
-        
+
         if (healthLoss < 200) {
           splinterCount = 1;
         } else if (healthLoss < 400) {
@@ -198,7 +198,7 @@ export default Ember.Route.extend({
           dayPlural = ' days.';
         }
 
-        score = round; //TODO: add sore calculator
+        // score = round; //TODO: add sore calculator
 
         _self.currentModel.set("score", score);
         _self.currentModel.set("days", round);
@@ -227,6 +227,7 @@ export default Ember.Route.extend({
       }
       function unpauseGame() {
         game.paused = false;
+        score = 0;
         health = 1000;
         result = 'Health: ' + health;
         round = 1;
@@ -243,7 +244,6 @@ export default Ember.Route.extend({
 
         enemies.forEach(function(enemy){
           enemy.destroy();
-          // enemy.enemyWake.destroy();
         });
 
         game.physics.p2.clearTilemapLayerBodies(map, layer);
@@ -252,7 +252,6 @@ export default Ember.Route.extend({
           exitBody.destroy();
           exitBody = undefined;
         }
-        //console.log(game.physics.p2.getBodies());
         game.physics.reset();
         game.physics.p2.reset();
         createMapAndObjects();
@@ -354,6 +353,8 @@ export default Ember.Route.extend({
 
       function nextRound() {
         round++;
+        score += health;
+        console.log(score)
 
         if (round % 2 === 0) {
           enemyCount += 1;

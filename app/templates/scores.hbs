@@ -1,17 +1,21 @@
-<table class="table table-inverse">
-<thead class="thead-default">
-  <tr><th>Username</th><th>Score</th><th>Days Alive</th></tr>
-</thead>
-<tbody>
-  {{#each model as |game index|}}
+<table class="table table-inverse" id="scores-table">
+  <thead class="thead-default">
+    <tr>
+      <th>Username</th>
+      <th>Score</th>
+      <th>Days Alive</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each model as |game index|}}
     {{#unless game.isNew }}
-      <tr>
-        <td>{{game.username}}</td>
-        <td>{{game.score}}</td>
-        <td>{{game.days}}</td>
-      </tr>
+    <tr>
+      <td>{{game.username}}</td>
+      <td>{{game.score}}</td>
+      <td>{{game.days}}</td>
+    </tr>
     {{/unless}}
-  {{/each}}
-</tbody>
+    {{/each}}
+  </tbody>
 </table>
 {{outlet}}
