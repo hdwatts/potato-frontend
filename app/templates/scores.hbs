@@ -6,7 +6,7 @@
   {{#each model as |game index|}}
     {{#unless game.isNew }}
       <tr>
-        <th scope="row">{{index}}</th>
+        <th scope="row">{{inc index}}</th>
         <td>{{game.username}}</td>
         <td>{{game.score}}</td>
         <td>{{game.days}}</td>
