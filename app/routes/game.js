@@ -103,9 +103,6 @@ export default Ember.Route.extend({
 
         // Place wake behind ship sprites
         game.world.swap(ship, ship.shipWake);
-        // enemies.forEach(function(enemy){
-        //   game.world.swap(enemy, enemy.enemyWake);
-        // })
 
       }
 
