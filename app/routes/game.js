@@ -54,7 +54,6 @@ export default Ember.Route.extend({
       var MIN_PREFABS = 6;
       var MAX_PREFABS = 12;
       // Game over variables
-      var menu;
       var GAME_WIDTH_PX = 800;
       var GAME_HEIGHT_PX = 608;
       var newGameLabel;
@@ -107,7 +106,7 @@ export default Ember.Route.extend({
 
       }
 
-      function enemyHit(body, bodyB, shapeA, shapeB, equation) {
+      function enemyHit(body) {
         //  The block hit something.
         //
         //  This callback is sent 5 arguments:
@@ -134,7 +133,7 @@ export default Ember.Route.extend({
             var v = Math.floor(Math.abs( v1.x - v2.x ) + Math.abs( v1.y - v2.y ));
             health = Math.max(health - v, 0);
             result = 'Health: ' + health;
-            if (health == 0){
+            if (health === 0){
               showFinalScore();
             }
           }
@@ -165,8 +164,8 @@ export default Ember.Route.extend({
 
         _self.currentModel.set("score", score);
         _self.currentModel.set("days", round);
-        _self.currentModel.save().then(function(record){
-            _self.currentModel.deleteRecord()
+        _self.currentModel.save().then(function(){
+            _self.currentModel.deleteRecord();
             _self.currentModel = _self.model({username: username});
         });
         //console.log(this.currentModel)
@@ -190,6 +189,8 @@ export default Ember.Route.extend({
       }
       function unpauseGame() {
           game.paused = false;
+          health = 1000;
+          result = 'Health: ' + health;
           round = 1;
           resetMap();
       }
@@ -295,15 +296,16 @@ export default Ember.Route.extend({
 
       function openExit() {
         if ( !exitBody ) {
+          var point;
           do {
-            var point = getEmptyPoint();
-          } while(Phaser.Math.distance(point.x * 32, point.y * 32, ship.x, ship.y) < 300)
+            point = getEmptyPoint();
+          } while(Phaser.Math.distance(point.x * 32, point.y * 32, ship.x, ship.y) < 300);
           map.swap(map.getTile(point.x, point.y).index, 4, point.x, point.y, 1,1 );
           //map.getTile(point.x, point.y).setCollision(true, true, true, true);
           //map.getTile(point.x, point.y).setCollisionCallback(nextRound);
           exitBody = game.physics.p2.createBody(point.x * 32, point.y * 32, 0);
-          exitBody.setRectangle(32, 32, 16, 16)
-          exitBody.createBodyCallback(ship, nextRound)
+          exitBody.setRectangle(32, 32, 16, 16);
+          exitBody.createBodyCallback(ship, nextRound);
           exitBody.addToWorld();
         }
         //map.setCollision(4, true);
@@ -312,10 +314,10 @@ export default Ember.Route.extend({
         //game.time.events.add(Phaser.Timer.SECOND * 15, nextRound, this);
       }
 
-      function nextRound(sprite, tile) {
+      function nextRound() {
         round++;
 
-        if (round % 2 == 0) {
+        if (round % 2 === 0) {
           enemyCount += 1;
         }
 
@@ -336,24 +338,11 @@ export default Ember.Route.extend({
         enemy.body.force.y = Math.sin(angle) * speed;
       }
 
-      function makePatrolRoute() {
-
-      }
-
-      function patrolAI(enemy, x, y) {
-        // Number of points in patrol, maximum is 5
-        var vertices = Math.floor(Math.random() * 7);
-
-
-        getEmptyPoint();
-      }
-
       function updateAI(enemy){
         if(ship){
           moveTowardsPoint(enemy, ship.x, ship.y);
         }
       }
-
 
       function update() {
 
@@ -375,7 +364,7 @@ export default Ember.Route.extend({
           shadow.x = enemies[index].x + enemyOffset.x;
           shadow.y = enemies[index].y + enemyOffset.y;
           shadow.angle = enemies[index].angle;
-        })
+        });
 
         // filter.update(game.input.activePointer);
 
@@ -580,8 +569,8 @@ export default Ember.Route.extend({
         console.log("Ship Point: " + point.x + " - " + point.y);
 
         // Shadow first
-        shadow = game.add.sprite(point.x * 32, point.y * 32, 'ship', 'shadow');
-        shadow.anchor.setTo(0.5, 0.5)
+        shadow = game.add.sprite(point.x * 32, point.y * 32, 'ship');
+        shadow.anchor.setTo(0.5, 0.5);
         shadow.tint = 0x000000;
         shadow.alpha = 0.6;
         shadow.scale.set(0.75);
@@ -614,7 +603,7 @@ export default Ember.Route.extend({
           }
           while(Phaser.Math.distance(point.x * 32, point.y * 32, ship.x, ship.y) < 300);
 
-          enemyShadows.push(game.add.sprite(point.x * 32, point.y * 32, 'enemy', 'shadow'));
+          enemyShadows.push(game.add.sprite(point.x * 32, point.y * 32, 'enemy'));
           enemies.push(game.add.sprite(point.x * 32, point.y * 32, 'enemy'));
         }
 
