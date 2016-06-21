@@ -36,13 +36,14 @@ export default Ember.Route.extend({
       var cursors;
       var enemies = [];
       var enemyCount = 3;
+      var health = 1000;
       var ship;
       var shadow;
       var enemyShadows = [];
       // Offset for shadow
       var offset = new Phaser.Point(5, 7);
       var enemyOffset = new Phaser.Point(4, 6);
-      var result = 'Move with the arrow keys';
+      var result = 'Health: ' + health;
       var round;
       var score;
       var ROUND_LENGTH = 15;
@@ -126,17 +127,25 @@ export default Ember.Route.extend({
         {
           if (body.sprite)
           {
-            result = 'You last hit: ' + body.sprite.key;
-            showFinalScore();
+            var v1 = new Phaser.Point(ship.body.velocity.x, ship.body.velocity.y);
+            var v2 = new Phaser.Point(body.velocity.x, body.velocity.y);
+
+            // calculate difference 
+            var v = Math.floor(Math.abs( v1.x - v2.x ) + Math.abs( v1.y - v2.y ));
+            health = Math.max(health - v, 0);
+            result = 'Health: ' + health;
+            if (health == 0){
+              showFinalScore();
+            }
           }
           else
           {
-            result = 'You last hit: the wall';
+            //result = 'You last hit: the wall';
           }
         }
         else
         {
-          result = 'Move with the arrow keys';
+          //result = 'Move with the arrow keys';
         }
       }
 
@@ -319,7 +328,7 @@ export default Ember.Route.extend({
         var speed = 60;
         var angle = Math.atan2(y - enemy.y, x - enemy.x);
 
-        // correct angle of angry bullets (depends on the sprite used)
+        // correct angle of angry ships
         enemy.body.rotation = angle + game.math.degToRad(90); 
 
         // accelerateToObject 
