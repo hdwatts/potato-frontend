@@ -229,6 +229,7 @@ export default Ember.Route.extend({
         game.paused = false;
         score = 0;
         health = 1000;
+        enemyCount = 3;
         result = 'Health: ' + health;
         round = 1;
         resetMap();
